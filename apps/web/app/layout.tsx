@@ -1,17 +1,37 @@
-import { Geist, Geist_Mono } from "next/font/google"
+import type { Metadata, Viewport } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+import './globals.css'
 
-import "@workspace/ui/globals.css"
-import { Toaster } from "@workspace/ui/components/toaster"
+const _geist = Geist({ subsets: ["latin"] });
+const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
-const fontSans = Geist({
-  subsets: ["latin"],
-  variable: "--font-sans",
-})
+export const metadata: Metadata = {
+  title: 'LogLens - High-Performance Log Analyzer',
+  description: 'A high-performance log analysis dashboard demonstrating virtual scrolling, cursor pagination, EXPLAIN analysis, and streaming computation patterns.',
+  generator: 'v0.app',
+  icons: {
+    icon: [
+      {
+        url: '/icon-light-32x32.png',
+        media: '(prefers-color-scheme: light)',
+      },
+      {
+        url: '/icon-dark-32x32.png',
+        media: '(prefers-color-scheme: dark)',
+      },
+      {
+        url: '/icon.svg',
+        type: 'image/svg+xml',
+      },
+    ],
+    apple: '/apple-icon.png',
+  },
+}
 
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-})
+export const viewport: Viewport = {
+  themeColor: '#1a1b2e',
+  userScalable: false,
+}
 
 export default function RootLayout({
   children,
@@ -19,12 +39,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
-      >
-        <main>{children}</main>
-        <Toaster />
+    <html lang="en" className="dark">
+      <body className="font-sans antialiased">
+        {children}
       </body>
     </html>
   )
