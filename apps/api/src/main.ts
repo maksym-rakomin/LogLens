@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Enable CORS with specific configuration
   app.enableCors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
@@ -13,7 +13,7 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
-  
+
   // Enable validation pipes
   app.useGlobalPipes(new ValidationPipe());
 
@@ -22,17 +22,6 @@ async function bootstrap() {
     .setTitle('API Documentation')
     .setDescription('REST API documentation for the application')
     .setVersion('1.0')
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'JWT',
-        description: 'Enter JWT token',
-        in: 'header',
-      },
-      'JWT-auth',
-    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
