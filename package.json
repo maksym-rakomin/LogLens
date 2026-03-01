@@ -6,7 +6,13 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "prisma:migrate:dev": "turbo run prisma:migrate:dev --filter=api",
+    "prisma:migrate:deploy": "turbo run prisma:migrate:deploy --filter=api",
+    "prisma:migrate:reset": "turbo run prisma:migrate:reset --filter=api",
+    "prisma:generate": "turbo run prisma:generate --filter=api",
+    "prisma:seed": "turbo run prisma:seed --filter=api",
+    "prisma:studio": "turbo run prisma:studio --filter=api"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
