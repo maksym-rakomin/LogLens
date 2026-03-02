@@ -6,6 +6,8 @@ import { LogsModule } from './modules/logs-module/logs.module';
 import { StatsModule } from './modules/stats/stats.module';
 import { AnalyzeModule } from './modules/analyze/analyze.module';
 import { SimulatorModule } from './modules/simulator/simulator.module';
+import { WorkerAnalysisModule } from './modules/worker-analysis/worker-analysis.module';
+import { ChildExportModule } from './modules/child-export/child-export.module';
 
 /**
  * Корневий модуль застосунку
@@ -19,6 +21,8 @@ import { SimulatorModule } from './modules/simulator/simulator.module';
 * - StatsModule - статистика та агрегація даних
 * - AnalyzeModule - поглиблений аналіз (синхронний та потоковий)
 * - SimulatorModule - симулятор логів (генерація тестових даних)
+* - WorkerAnalysisModule - аналіз логів через Worker Threads (важкі обчислення)
+* - ChildExportModule - експорт через Child Process (зовнішні процеси ОС)
  */
 @Module({
   imports: [
@@ -35,6 +39,10 @@ import { SimulatorModule } from './modules/simulator/simulator.module';
     AnalyzeModule,
     // Модуль симулятора - генерує тестові лоґи для демонстрації
     SimulatorModule,
+    // Модуль Worker Analysis - запуск важких обчислень у Worker Threads
+    WorkerAnalysisModule,
+    // Модуль Child Export - запуск зовнішніх процесів для експорту/архівації
+    ChildExportModule,
   ],
 })
 export class AppModule {}
