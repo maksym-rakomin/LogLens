@@ -9,7 +9,7 @@ import { LogsPanel } from "@/components/logs-panel"
 import { AnalyticsPanel } from "@/components/analytics-panel"
 import { PerformancePanel } from "@/components/performance-panel"
 import { OfflinePanel } from "@/components/offline-panel"
-import type { StatsResponse } from "@/lib/types"
+import { SystemTasksPanel } from "@/components/system-tasks-panel"
 import {
   ScrollText,
   BarChart3,
@@ -75,6 +75,13 @@ export default function DashboardPage() {
               <HardDrive className="size-3.5" />
               Offline
             </TabsTrigger>
+            <TabsTrigger
+              value="system"
+              className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground rounded-none px-4 text-xs font-mono gap-1.5"
+            >
+              <Cpu className="size-3.5" />
+              System Tasks
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -92,6 +99,10 @@ export default function DashboardPage() {
 
         <TabsContent value="offline" className="flex-1 min-h-0 mt-0">
           <OfflinePanel />
+        </TabsContent>
+
+        <TabsContent value="system" className="flex-1 min-h-0 mt-0">
+          <SystemTasksPanel />
         </TabsContent>
       </Tabs>
     </div>
