@@ -66,15 +66,26 @@ const LogRow = memo(function LogRow({ entry, style }: LogRowProps) {
 interface VirtualLogTableProps {
   entries: LogEntry[]
   isLoading: boolean
+  isFetching?: boolean
   onLoadMore?: () => void
   hasMore?: boolean
+  // Props для offset-пагінації
+  page?: number
+  totalPages?: number
+  onPrevPage?: () => void
+  onNextPage?: () => void
 }
 
 export function VirtualLogTable({
   entries,
   isLoading,
+  isFetching,
   onLoadMore,
   hasMore,
+  page,
+  totalPages,
+  onPrevPage,
+  onNextPage,
 }: VirtualLogTableProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [scrollTop, setScrollTop] = useState(0)
@@ -197,10 +208,58 @@ export function VirtualLogTable({
           Virtual DOM: {visibleItems.length} rows rendered |{" "}
           Row height: {ROW_HEIGHT}px | Overscan: {OVERSCAN}
         </span>
-        {hasMore && (
+        {hasMore && !isFetching && (
           <span className="text-primary">Scroll down to load more</span>
         )}
+        {isFetching && (
+          <span className="flex items-center gap-1 text-primary">
+            <span className="size-3 border border-primary border-t-transparent rounded-full animate-spin" />
+            Loading...
+          </span>
+        )}
       </div>
+
+      {/* Pagination controls for offset mode */}
+      {onPrevPage && onNextPage && (
+        <div className="flex items-center justify-center gap-4 px-4 py-2 border-t border-border bg-card shrink-0">
+          <button
+            onClick={onPrevPage}
+            disabled={(page ?? 1) === 1 || isFetching}
+            className="px-4 py-1.5 bg-secondary text-secondary-foreground rounded text-xs font-mono disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary/80 transition-colors"
+          >
+            Previous
+          </button>
+          <span className="text-xs font-mono text-muted-foreground">
+            Page {page ?? 1} of {totalPages ?? 1}
+          </span>
+          <button
+            onClick={onNextPage}
+            disabled={(page ?? 1) >= (totalPages ?? 1) || isFetching}
+            className="px-4 py-1.5 bg-secondary text-secondary-foreground rounded text-xs font-mono disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary/80 transition-colors"
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* Load more button for cursor mode */}
+      {onLoadMore && hasMore && (
+        <div className="flex flex-col items-center gap-2 px-4 py-3 border-t border-border bg-card shrink-0">
+          <button
+            onClick={onLoadMore}
+            disabled={isFetching || !hasMore}
+            className="px-8 py-2 bg-primary text-primary-foreground rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors flex items-center gap-2"
+          >
+            {isFetching && (
+              <span className="size-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+            )}
+            {isFetching ? "Loading..." : "Load More 200 Logs"}
+          </button>
+          <span className="text-xs text-muted-foreground font-mono">
+            Showing {entries.length.toLocaleString()} of {entries.length.toLocaleString()} entries
+          </span>
+        </div>
+      )}
     </div>
   )
 }

@@ -24,11 +24,44 @@ export const api = createApi({
     }),
 
     // Отримання списку логів з фільтрацією та пагінацією
+    // Налаштовано для підтримки нескінченного скролу (Infinite Scroll)
     getLogs: builder.query<LogsResponse, Partial<LogFilters>>({
       query: (filters) => ({
         url: '/api/logs',
         params: filters, // Параметри автоматично перетворюються в query рядок
       }),
+      
+      // 1. Групуємо кеш для правильної роботи нескінченного скролу
+      // Ми кажемо RTK Query: "Ігноруй зміну cursor або page при створенні ключа кешу".
+      // Якщо змінюється пошук (search) або рівень (level) - це новий кеш (список очиститься).
+      // Якщо змінюється тільки cursor - використовуємо існуючий кеш для склеювання даних.
+      serializeQueryArgs: ({ endpointName, queryArgs }) => {
+        const { cursor, page, ...baseFilters } = queryArgs;
+        return `${endpointName}-${JSON.stringify(baseFilters)}`;
+      },
+      
+      // 2. Логіка склеювання (Merge) старих і нових даних
+      // currentCache - те, що вже є на екрані, newItems - те, що щойно прийшло з бекенду
+      merge: (currentCache, newItems, { arg }) => {
+        // Якщо це режим cursor І ми передали конкретний cursor (тобто це завантаження наступної сторінки)
+        if (arg.mode === 'cursor' && arg.cursor) {
+          // Додаємо нові логи в кінець існуючого масиву
+          currentCache.data.push(...newItems.data);
+          // Оновлюємо метадані (щоб отримати новий nextCursor)
+          currentCache.meta = newItems.meta;
+        } else {
+          // Якщо це перше завантаження, зміна фільтрів або режим offset - повністю замінюємо дані
+          return newItems;
+        }
+      },
+      
+      // 3. Примусовий запит при зміні аргументів
+      // Оскільки ми сказали ігнорувати cursor у ключі кешу (пункт 1),
+      // нам треба змусити RTK Query робити запит, коли cursor все ж таки змінюється
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg !== previousArg;
+      },
+      
       providesTags: ['Logs'],
     }),
 

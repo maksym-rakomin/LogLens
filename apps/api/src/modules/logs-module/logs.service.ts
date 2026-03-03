@@ -76,12 +76,17 @@ export class LogsService {
     } else {
       // Режим cursor-пагинації (більш продуктивний для великих даних)
       const startSlice = performance.now();
+
+      // Перетворюємо cursor з рядка в число (якщо він є)
+      // Query-параметри завжди приходять як рядки, тому явно перетворюємо
+      const cursorId = cursor ? Number(cursor) : null;
+
       // Отримуємо на один запис більше, щоб перевірити, чи є ще дані
       const logs = await this.prisma.log.findMany({
         where,
         take: limit + 1,
-        skip: cursor ? 1 : 0,
-        cursor: cursor ? { id: cursor } : undefined,
+        skip: cursorId ? 1 : 0,
+        cursor: cursorId ? { id: cursorId } : undefined,
         orderBy: { id: 'desc' },
       });
       const sliceTime = performance.now() - startSlice;

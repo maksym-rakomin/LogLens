@@ -19,6 +19,7 @@ export interface LogFilters {
   mode: "cursor" | "offset"
   limit: number
   page?: number
+  cursor?: number | null
 }
 
 export interface LogsMeta {
