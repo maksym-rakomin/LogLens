@@ -1,25 +1,35 @@
+// Компонент панелі продуктивності з використанням RTK Query
+// Порівнює продуктивність OFFSET і CURSOR пагінації
 "use client"
 
 import { useCallback, useState } from "react"
-import useSWR from "swr"
-import { fetcher } from "@/lib/fetcher"
+// Використовуємо хук RTK Query для отримання EXPLAIN аналізу
+import { useGetExplainQuery } from "@/lib/store/api"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import type { ExplainResponse, AnalyzeStep } from "@/lib/types"
 import { ArrowRight, Play, Zap, Clock, Terminal } from "lucide-react"
+import {PerformanceApi} from "@/lib/api-handlers/performance-api";
 
 export function PerformancePanel() {
+  // Цільова сторінка для тестування продуктивності
   const [targetPage, setTargetPage] = useState(500)
-  const explainUrl = `/api/logs/explain?page=${targetPage}`
 
-  const { data: explainData, isLoading: explainLoading } =
-    useSWR<ExplainResponse>(explainUrl, fetcher, { revalidateOnFocus: false })
+  // Хук RTK Query для отримання EXPLAIN аналізу
+  // Параметри передаються як об'єкт, RTK Query автоматично перетворює їх у query рядок
+  const { data: explainData, isLoading: explainLoading } = useGetExplainQuery(
+    { page: targetPage },
+    {
+      // Відключаємо ревалідацію при фокусі вікна
+      refetchOnFocus: false,
+    }
+  )
 
   return (
     <div className="flex flex-col gap-4 p-4 overflow-auto flex-1">
-      {/* EXPLAIN comparison */}
+      {/* Порівняння EXPLAIN: OFFSET vs CURSOR */}
       <ExplainComparison
         data={explainData}
         isLoading={explainLoading}
@@ -27,12 +37,13 @@ export function PerformancePanel() {
         onTargetPageChange={setTargetPage}
       />
 
-      {/* Sync vs Streaming */}
+      {/* Порівняння синхронного та потокового аналізу */}
       <AnalyzeComparison />
     </div>
   )
 }
 
+// Компонент порівняння продуктивності OFFSET і CURSOR пагінації
 function ExplainComparison({
   data,
   isLoading,
@@ -79,12 +90,13 @@ function ExplainComparison({
       </CardHeader>
       <CardContent>
         {isLoading || !data ? (
+          // Індикатор завантаження даних
           <div className="flex items-center justify-center py-8">
             <div className="size-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4">
-            {/* OFFSET */}
+            {/* OFFSET пагінація */}
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="font-mono text-xs text-log-error border-log-error/30">
@@ -99,7 +111,7 @@ function ExplainComparison({
               </pre>
             </div>
 
-            {/* CURSOR */}
+            {/* CURSOR пагінація */}
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="font-mono text-xs text-primary border-primary/30">
@@ -114,7 +126,7 @@ function ExplainComparison({
               </pre>
             </div>
 
-            {/* Result */}
+            {/* Результат порівняння */}
             <div className="col-span-2 flex items-center justify-center gap-3 py-2 rounded-lg bg-primary/5 border border-primary/20">
               <Zap className="size-4 text-primary" />
               <span className="text-sm font-mono">
@@ -134,30 +146,36 @@ function ExplainComparison({
   )
 }
 
+// Компонент порівняння синхронного та потокового аналізу
 function AnalyzeComparison() {
+  // Стан для синхронного результату
   const [syncResult, setSyncResult] = useState<{
     computeTimeMs: number
     blocked: boolean
   } | null>(null)
   const [syncLoading, setSyncLoading] = useState(false)
 
+  // Стан для потокового аналізу
   const [streamSteps, setStreamSteps] = useState<AnalyzeStep[]>([])
   const [streamProgress, setStreamProgress] = useState(0)
   const [streamLoading, setStreamLoading] = useState(false)
   const [streamComplete, setStreamComplete] = useState(false)
 
+  // Запуск синхронного аналізу
+  // Використовуємо звичайний fetch так як це одноразовий запит
   const runSync = useCallback(async () => {
     setSyncResult(null)
     setSyncLoading(true)
     try {
-      const res = await fetch("/api/analyze?mode=sync")
-      const json = await res.json()
+      const json = await PerformanceApi.getAnalyzeSync()
       setSyncResult({ computeTimeMs: json.computeTimeMs, blocked: json.blocked })
     } finally {
       setSyncLoading(false)
     }
   }, [])
 
+  // Запуск потокового аналізу через Server-Sent Events (SSE)
+  // RTK Query не підходить для стримінгу, використовуємо нативний EventSource
   const runStream = useCallback(async () => {
     setStreamSteps([])
     setStreamProgress(0)
@@ -165,8 +183,7 @@ function AnalyzeComparison() {
     setStreamLoading(true)
 
     try {
-      const res = await fetch("/api/analyze?mode=stream")
-      const reader = res.body?.getReader()
+      const reader = await PerformanceApi.getAnalyzeStream()
       const decoder = new TextDecoder()
 
       if (!reader) return
@@ -192,7 +209,7 @@ function AnalyzeComparison() {
                 setStreamComplete(true)
               }
             } catch {
-              // ignore malformed
+              // Ігноруємо некоректні дані
             }
           }
         }
@@ -215,7 +232,7 @@ function AnalyzeComparison() {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-4">
-          {/* Sync */}
+          {/* Синхронний аналіз (блокуючий) */}
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <Badge variant="outline" className="font-mono text-xs text-log-error border-log-error/30">
@@ -261,7 +278,7 @@ function AnalyzeComparison() {
             </div>
           </div>
 
-          {/* Stream */}
+          {/* Потоковий аналіз (прогресивний) */}
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <Badge variant="outline" className="font-mono text-xs text-primary border-primary/30">

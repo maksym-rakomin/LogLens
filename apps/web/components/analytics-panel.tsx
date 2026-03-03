@@ -1,7 +1,8 @@
+// Компонент панелі аналітики з використанням RTK Query для завантаження статистики
 "use client"
 
-import useSWR from "swr"
-import { fetcher } from "@/lib/fetcher"
+// Використовуємо хук RTK Query для отримання статистики
+import { useGetStatsQuery } from "@/lib/store/api"
 import type { StatsResponse } from "@/lib/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -19,6 +20,7 @@ import {
   Cell,
 } from "recharts"
 
+// Цвета для разных уровней логов (INFO, WARN, ERROR, DEBUG)
 const LEVEL_COLORS: Record<string, string> = {
   INFO: "oklch(0.65 0.18 250)",
   WARN: "oklch(0.75 0.15 65)",
@@ -26,6 +28,7 @@ const LEVEL_COLORS: Record<string, string> = {
   DEBUG: "oklch(0.45 0.01 260)",
 }
 
+// Кольори для різних сервісів у системі
 const SERVICE_COLORS = [
   "oklch(0.65 0.18 160)",
   "oklch(0.65 0.18 250)",
@@ -34,6 +37,7 @@ const SERVICE_COLORS = [
   "oklch(0.60 0.12 200)",
 ]
 
+// Компонент картки зі статистикою (числове значення + підпис)
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-1 rounded-lg border border-border bg-secondary/30 px-4 py-3">
@@ -47,6 +51,8 @@ function StatCard({ label, value }: { label: string; value: string }) {
   )
 }
 
+// Кастомний компонент підказки для графіків
+// Відображає детальну інформацію при наведенні на точки графіка
 function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string }) {
   if (!active || !payload) return null
   return (
@@ -67,10 +73,14 @@ function CustomTooltip({ active, payload, label }: { active?: boolean; payload?:
 }
 
 export function AnalyticsPanel() {
-  const { data, isLoading } = useSWR<StatsResponse>("/api/stats", fetcher, {
-    revalidateOnFocus: false,
+  // Хук RTK Query для отримання статистики
+  // undefined означає що не передаємо жодних параметрів у запит
+  const { data, isLoading } = useGetStatsQuery(undefined, {
+    // Відключаємо ревалідацію при фокусі вікна
+    refetchOnFocus: false,
   })
 
+  // Показуємо індикатор завантаження поки дані не отримані
   if (isLoading || !data) {
     return (
       <div className="flex items-center justify-center flex-1">
@@ -84,11 +94,14 @@ export function AnalyticsPanel() {
     )
   }
 
+  // Перетворюємо дані про рівні логів у формат для графіка PieChart
   const levelData = Object.entries(data.levelCounts).map(([name, value]) => ({
     name,
     value,
   }))
 
+  // Перетворюємо дані про сервіси у формат для графіка BarChart
+  // Прибираємо суфікси з назв для відображення
   const serviceData = Object.entries(data.serviceCounts).map(([name, value]) => ({
     name: name.replace("-service", "").replace("api-", ""),
     fullName: name,
@@ -97,7 +110,7 @@ export function AnalyticsPanel() {
 
   return (
     <div className="flex flex-col gap-4 p-4 overflow-auto flex-1">
-      {/* Stat cards */}
+      {/* Картки з основною статистикою */}
       <div className="grid grid-cols-4 gap-3">
         <StatCard label="Total Logs" value={data.totalLogs.toLocaleString()} />
         <StatCard label="Unique IPs" value={data.uniqueIPs.toLocaleString()} />
@@ -111,7 +124,7 @@ export function AnalyticsPanel() {
         />
       </div>
 
-      {/* Timeline chart */}
+      {/* Графік часової шкали обсягів логів (AreaChart) */}
       <Card className="py-4 gap-3">
         <CardHeader className="pb-0">
           <CardTitle className="text-sm font-mono">Log Volume Timeline</CardTitle>
@@ -128,6 +141,7 @@ export function AnalyticsPanel() {
                 />
                 <YAxis tick={{ fontSize: 10, fill: "oklch(0.60 0.01 260)" }} />
                 <Tooltip content={<CustomTooltip />} />
+                {/* Шари графіка для кожного рівня логів */}
                 <Area
                   type="monotone"
                   dataKey="ERROR"
@@ -167,7 +181,7 @@ export function AnalyticsPanel() {
       </Card>
 
       <div className="grid grid-cols-2 gap-4">
-        {/* Level Distribution */}
+        {/* Кругова діаграма розподілу за рівнями логів */}
         <Card className="py-4 gap-3">
           <CardHeader className="pb-0">
             <CardTitle className="text-sm font-mono">Level Distribution</CardTitle>
@@ -197,6 +211,7 @@ export function AnalyticsPanel() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
+            {/* Легенда для кругової діаграми */}
             <div className="flex items-center justify-center gap-4 mt-2">
               {levelData.map((entry) => (
                 <div key={entry.name} className="flex items-center gap-1.5 text-xs font-mono">
@@ -211,7 +226,7 @@ export function AnalyticsPanel() {
           </CardContent>
         </Card>
 
-        {/* Service Distribution */}
+        {/* Горизонтальна гістограма розподілу за сервісами */}
         <Card className="py-4 gap-3">
           <CardHeader className="pb-0">
             <CardTitle className="text-sm font-mono">Service Distribution</CardTitle>
@@ -245,7 +260,7 @@ export function AnalyticsPanel() {
         </Card>
       </div>
 
-      {/* Hourly distribution */}
+      {/* Гістограма розподілу за годинами (UTC) */}
       <Card className="py-4 gap-3">
         <CardHeader className="pb-0">
           <CardTitle className="text-sm font-mono">Hourly Distribution (UTC)</CardTitle>
@@ -262,6 +277,7 @@ export function AnalyticsPanel() {
                 />
                 <YAxis tick={{ fontSize: 10, fill: "oklch(0.60 0.01 260)" }} />
                 <Tooltip content={<CustomTooltip />} />
+                {/* Стопколонки для кожного рівня логів */}
                 <Bar dataKey="INFO" stackId="a" fill={LEVEL_COLORS.INFO} />
                 <Bar dataKey="WARN" stackId="a" fill={LEVEL_COLORS.WARN} />
                 <Bar dataKey="ERROR" stackId="a" fill={LEVEL_COLORS.ERROR} />

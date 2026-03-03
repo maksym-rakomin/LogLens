@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import useSWR from "swr"
-import { fetcher } from "@/lib/fetcher"
+// Використовуємо хук RTK Query для отримання статистики
+import { useGetStatsQuery } from "@/lib/store/api"
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { LogsPanel } from "@/components/logs-panel"
@@ -15,13 +16,17 @@ import {
   BarChart3,
   Gauge,
   HardDrive,
+  Cpu,
 } from "lucide-react"
 
 export default function DashboardPage() {
   const [isOnline, setIsOnline] = useState(true)
 
-  const { data: stats } = useSWR<StatsResponse>("/api/stats", fetcher, {
-    revalidateOnFocus: false,
+  // useGetStatsQuery з RTK Query
+  // Хук автоматично керує кешуванням, завантаженням та помилками
+  const { data: stats, isLoading, isError } = useGetStatsQuery(undefined, {
+    // Можна увімкнути фонове оновлення за необхідності:
+    // pollingInterval: 60000,
   })
 
   useEffect(() => {
