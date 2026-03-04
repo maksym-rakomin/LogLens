@@ -1,112 +1,191 @@
-# turborepo monorepo with Next.js 15 + NestJS 11 + shadcn
+# LogLens
 
-This template is for creating a comprehensive Enterprise level app using Next.js 15 (frontend) and NestJS 11 (backend).
-Use database of your choice (MySQL, PostgreSQL, etc.) and configure it in the app.
+A comprehensive log monitoring and analytics dashboard built with Next.js 16, NestJS 11, and modern UI components.
 
-## Usage
+## Overview
 
-You can use or follow the step 1 to clone.
-```bash
-pnpm dlx superepo@latest init
+LogLens is a monorepo-based application for real-time log monitoring, analytics, and performance analysis. It provides a powerful dashboard for visualizing system logs, tracking performance metrics, and managing system tasks.
+
+## Tech Stack
+
+**Frontend**
+- Next.js 16 with Turbopack
+- React 19
+- Redux Toolkit with RTK Query
+- Tailwind CSS 4
+- shadcn/ui components
+- Recharts for data visualization
+
+**Backend**
+- NestJS 11
+- Prisma ORM
+- PostgreSQL
+- Swagger/OpenAPI documentation
+
+**Development**
+- Turborepo for monorepo management
+- TypeScript 5.7
+- ESLint + Prettier
+
+## Project Structure
+
 ```
+LogLens/
+├── apps/
+│   ├── api/          # NestJS backend server
+│   └── web/          # Next.js frontend application
+├── packages/
+│   ├── eslint-config/    # Shared ESLint configuration
+│   ├── typescript-config/# Shared TypeScript configuration
+│   └── ui/               # Shared UI components
+└── turbo.json            # Turborepo configuration
+```
+
+## Features
+
+### Dashboard Tabs
+
+- **Logs** - Real-time log viewing with filtering, search, and cursor-based pagination
+- **Analytics** - Visual analytics with charts showing log distribution by level, service, and time
+- **Performance** - Performance metrics and monitoring
+- **Offline** - Offline mode support with local storage
+- **System Tasks** - System task management and monitoring
+
+### Core Features
+
+- Real-time log streaming and filtering
+- Advanced log search with multiple criteria
+- Cursor-based pagination for efficient data loading
+- Performance comparison tools (EXPLAIN queries)
+- Interactive data visualization
+- Offline-first architecture
+- Responsive design with dark/light theme support
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js >= 20
+- pnpm >= 9.12.3
+- PostgreSQL database
+
+### Installation
 
 1. Clone the repository
 
 ```bash
-git clone https://github.com/mohitarora/superepo.git
-
-cd superepo
+git clone https://github.com/maksym-rakomin/LogLens.git
+cd LogLens
 ```
 
-2. Setup Environment Variables
-
-Copy .env.example to .env in both apps/api and apps/web
-```bash
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
-```
-
-3. Install dependencies
+2. Install dependencies
 
 ```bash
 pnpm install
 ```
 
-4. Start the database (optional)
+3. Setup environment variables
 
-example for Postgres:
 ```bash
-docker pull postgres
-docker run -d --name <container_name> -p 5432:5432 -e POSTGRES_PASSWORD=<new_password> postgres
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
 ```
-then update the .env file with the new password (default **DB_USERNAME**=postgres, **DB_DATABASE**=postgres) 
 
-5. Start the app
+Update `apps/api/.env` with your database credentials:
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+PORT=4000
+NODE_ENV=development
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+4. Setup the database
+
+```bash
+# Generate Prisma client
+pnpm prisma:generate
+
+# Run migrations
+pnpm prisma:migrate:dev
+
+# (Optional) Seed the database
+pnpm prisma:seed
+```
+
+5. Start the development servers
 
 ```bash
 pnpm dev
 ```
 
-6. Visit http://localhost:3000
+6. Open your browser
 
-7. Visit http://localhost:4000/api/docs
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:4000
+- API Documentation: http://localhost:4000/api
 
-If you need to install new packages, you can add to the respective app folder:
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/logs` | GET | Get logs with filtering and pagination |
+| `/api/logs/explain` | GET | Compare pagination performance |
+| `/api/stats` | GET | Get comprehensive log statistics |
+
+## Available Commands
 
 ```bash
-pnpm add <package-name>
+# Development
+pnpm dev                    # Start all apps in development mode
+
+# Build
+pnpm build                  # Build all apps
+
+# Database
+pnpm prisma:generate        # Generate Prisma client
+pnpm prisma:migrate:dev     # Run development migrations
+pnpm prisma:migrate:deploy  # Run production migrations
+pnpm prisma:migrate:reset   # Reset database and run migrations
+pnpm prisma:seed            # Seed the database
+pnpm prisma:studio          # Open Prisma Studio
+
+# Code Quality
+pnpm lint                   # Run ESLint
+pnpm format                 # Format code with Prettier
 ```
 
-## Adding shadcn components
+## Adding New Packages
 
-To add shadcn components to your app, run the following command at the root of your `web` app:
+To add a package to a specific app:
 
 ```bash
-pnpm dlx shadcn@latest add button -c apps/web
+cd apps/web && pnpm add <package-name>
+# or
+cd apps/api && pnpm add <package-name>
 ```
 
-This will place the ui components in the `packages/ui/src/components` directory.
+## Adding shadcn Components
 
-## Using components
+To add new shadcn/ui components:
 
-To use the components in your app, import them from the `ui` package.
-
-```tsx
-import { Button } from "@workspace/ui/components/ui/button"
+```bash
+cd apps/web
+pnpm dlx shadcn@latest add <component-name>
 ```
 
-## Functionality
+## State Management
 
-- Create New user from Register page
-- Login to app using credentials from Login page
-- Go to Settings page and invite a new user
-- Copy the invitation URL and register the user (either in another browser or in incognito mode)
-- Login using new user credentials from Login page
+The application uses Redux Toolkit with RTK Query for:
+- API state management and caching
+- Automatic re-fetching and invalidation
+- Optimistic updates
 
-- NOTE: Now you have successfully created an admin user as well as a regular user.
+RTK Query hooks are available in `apps/web/lib/store/api.ts`.
 
-## Features
+## Database Schema
 
-**Core Architecture**
-- Next.js 15 with Turbopack
-- Monorepo setup using Turborepo
-- Shared ESLint/TypeScript configs
-
-**Functionality**
-- Authentication (NextAuth.js)
-- Form validation with Zod + react-hook-form
-- Data visualization with Recharts
-
-
-## Packages 
-
-- Next.js 15
-- NestJS 11
-- shadcn/ui
-- next-auth
-- passport
-- TypeORM
+The application uses Prisma ORM with PostgreSQL. View and modify the schema in `apps/api/prisma/schema.prisma`.
 
 ## License
 
-Superepo is released under the [MIT License](https://opensource.org/licenses/MIT).
+LogLens is released under the [MIT License](https://opensource.org/licenses/MIT).
