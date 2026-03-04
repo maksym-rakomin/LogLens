@@ -26,6 +26,7 @@ LogLens is a monorepo-based application for real-time log monitoring, analytics,
 - Turborepo for monorepo management
 - TypeScript 5.7
 - ESLint + Prettier
+- Docker & Docker Compose
 
 ## Project Structure
 
@@ -38,6 +39,7 @@ LogLens/
 │   ├── eslint-config/    # Shared ESLint configuration
 │   ├── typescript-config/# Shared TypeScript configuration
 │   └── ui/               # Shared UI components
+├── docker-compose.yml    # Docker orchestration
 └── turbo.json            # Turborepo configuration
 ```
 
@@ -63,11 +65,65 @@ LogLens/
 
 ## Getting Started
 
-### Prerequisites
+### Quick Start with Docker (Recommended)
+
+The easiest way to run LogLens is using Docker Compose. This will start PostgreSQL, the API server, and the web frontend in isolated containers.
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/maksym-rakomin/LogLens.git
+cd LogLens
+```
+
+2. Copy the environment file
+
+```bash
+cp .env.example .env
+```
+
+3. Start all services with Docker Compose
+
+```bash
+docker-compose up -d
+```
+
+4. Wait for services to be ready (database migrations will run automatically)
+
+```bash
+# Check service status
+docker-compose ps
+
+# View logs
+docker-compose logs -f
+```
+
+5. Open your browser
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:4000
+- API Documentation: http://localhost:4000/api
+
+**Stopping the application:**
+
+```bash
+docker-compose down
+```
+
+**Reset everything (including database):**
+
+```bash
+docker-compose down -v
+```
+
+### Local Development Setup
+
+#### Prerequisites
 
 - Node.js >= 20
 - pnpm >= 9.12.3
-- PostgreSQL database
+- PostgreSQL database (or use Docker setup above)
+- Docker & Docker Compose (optional, for containerized deployment)
 
 ### Installation
 
@@ -87,17 +143,20 @@ pnpm install
 3. Setup environment variables
 
 ```bash
+cp .env.example .env
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 ```
 
-Update `apps/api/.env` with your database credentials:
+Update `.env` or `apps/api/.env` with your database credentials:
 ```env
 DATABASE_URL=postgresql://user:password@localhost:5432/dbname
 PORT=4000
 NODE_ENV=development
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
+
+> **Note:** If using Docker for the database only, use `DATABASE_URL=postgresql://user:password@localhost:5432/dbname` (localhost, not 'db')
 
 4. Setup the database
 
@@ -134,6 +193,8 @@ pnpm dev
 
 ## Available Commands
 
+### Local Development
+
 ```bash
 # Development
 pnpm dev                    # Start all apps in development mode
@@ -154,6 +215,53 @@ pnpm lint                   # Run ESLint
 pnpm format                 # Format code with Prettier
 ```
 
+### Docker Commands
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Start in foreground (see logs)
+docker-compose up
+
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes (resets database)
+docker-compose down -v
+
+# View logs
+docker-compose logs -f
+
+# View specific service logs
+docker-compose logs -f api
+docker-compose logs -f db
+docker-compose logs -f web
+
+# Restart a service
+docker-compose restart api
+
+# Rebuild and restart
+docker-compose up -d --build
+
+# Run database seed (after container is running)
+docker-compose exec api pnpm prisma:seed
+
+# Access database
+docker-compose exec db psql -U loglens -d loglens
+
+# Check service status
+docker-compose ps
+
+# Using helper script
+./docker.sh start      # Start all services
+./docker.sh stop       # Stop all services
+./docker.sh logs       # View logs
+./docker.sh status     # Check status
+./docker.sh seed       # Run database seed
+./docker.sh help       # Show all commands
+```
+
 ## Adding New Packages
 
 To add a package to a specific app:
@@ -162,6 +270,45 @@ To add a package to a specific app:
 cd apps/web && pnpm add <package-name>
 # or
 cd apps/api && pnpm add <package-name>
+```
+
+## Docker Troubleshooting
+
+See [DOCKER.md](./DOCKER.md) for comprehensive Docker documentation.
+
+### Common Issues
+
+**Database connection errors:**
+- Ensure the database container is healthy: `docker-compose ps`
+- Check database logs: `docker-compose logs db`
+- Wait for the health check to pass before API starts
+
+**API fails to start:**
+- Check if database migrations ran: `docker-compose logs api`
+- Manually run migrations: `docker-compose exec api pnpm prisma:migrate:deploy`
+
+**Port already in use:**
+- Change ports in `.env` file (API_PORT, WEB_PORT, DB_PORT)
+- Restart: `docker-compose up -d`
+
+**Build fails:**
+- Clear cache and rebuild: `docker-compose build --no-cache`
+- Check Node version compatibility (requires Node 20+)
+
+### Container Access
+
+```bash
+# Access API container shell
+docker-compose exec api sh
+
+# Access web container shell
+docker-compose exec web sh
+
+# Access database shell
+docker-compose exec db sh
+
+# View environment variables in container
+docker-compose exec api env
 ```
 
 ## Adding shadcn Components

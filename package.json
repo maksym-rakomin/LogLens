@@ -12,7 +12,16 @@
     "prisma:migrate:reset": "turbo run prisma:migrate:reset --filter=api",
     "prisma:generate": "turbo run prisma:generate --filter=api",
     "prisma:seed": "turbo run prisma:seed --filter=api",
-    "prisma:studio": "turbo run prisma:studio --filter=api"
+    "prisma:studio": "turbo run prisma:studio --filter=api",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:down:volumes": "docker-compose down -v",
+    "docker:logs": "docker-compose logs -f",
+    "docker:build": "docker-compose build",
+    "docker:rebuild": "docker-compose up -d --build",
+    "docker:seed": "docker-compose exec api pnpm prisma:seed",
+    "docker:ps": "docker-compose ps",
+    "docker:db": "docker-compose exec db psql -U loglens -d loglens"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",

@@ -97,12 +97,35 @@ function generateRequestId(rand: () => number) {
   return id;
 }
 
+// Add this helper to create the batch in a isolated scope
+function generateBatch(
+  size: number,
+  startIdx: number,
+  rand: () => number,
+  now: number,
+  thirtyDaysMs: number,
+): Prisma.LogCreateManyInput[] {
+  const batch: Prisma.LogCreateManyInput[] = [];
+  for (let j = 0; j < size; j++) {
+    const level = pickLevel(rand);
+    batch.push({
+      timestamp: new Date(now - Math.floor(rand() * thirtyDaysMs)),
+      level,
+      service: SERVICES[Math.floor(rand() * SERVICES.length)],
+      message: MESSAGES[level][Math.floor(rand() * MESSAGES[level].length)],
+      ip: generateIP(rand),
+      requestId: generateRequestId(rand),
+    });
+  }
+  return batch;
+}
+
 async function main() {
   console.log('Cleaning old logs...');
   await prisma.log.deleteMany();
 
-  const COUNT = 1_000_000;
-  const BATCH_SIZE = 100_000;
+  const COUNT = 500_000;
+  const BATCH_SIZE = 10_000;
   const rand = seededRandom(42);
   const now = Date.now();
   const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
@@ -110,25 +133,21 @@ async function main() {
   console.log(`Generating ${COUNT} logs...`);
 
   for (let i = 0; i < COUNT; i += BATCH_SIZE) {
-    const batch: Prisma.LogCreateManyInput[] = [];
     const limit = Math.min(BATCH_SIZE, COUNT - i);
-    for (let j = 0; j < limit; j++) {
-      const level = pickLevel(rand);
-      batch.push({
-        timestamp: new Date(now - Math.floor(rand() * thirtyDaysMs)),
-        level,
-        service: SERVICES[Math.floor(rand() * SERVICES.length)],
-        message: MESSAGES[level][Math.floor(rand() * MESSAGES[level].length)],
-        ip: generateIP(rand),
-        requestId: generateRequestId(rand),
-      });
-    }
-    await prisma.log.createMany({ data: batch });
-    console.log(`Inserted ${i + limit} / ${COUNT}`);
-  }
-  console.log('Sedation complete!');
-}
 
+    // 1. Generate and Send immediately
+    const batch = generateBatch(limit, i, rand, now, thirtyDaysMs);
+    await prisma.log.createMany({ data: batch });
+
+    console.log(`Inserted ${i + limit} / ${COUNT}`);
+
+    // 2. Allow GC to run by yielding the event loop every 5 batches
+    if (i % (BATCH_SIZE * 5) === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
+  console.log('Seed complete!');
+}
 main()
   .catch((e) => {
     console.error(e);
