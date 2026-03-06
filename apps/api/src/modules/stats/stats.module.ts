@@ -3,12 +3,12 @@ import { StatsController } from './stats.controller';
 import { StatsService } from './stats.service';
 
 /**
- * Модуль Stats - відповідає за збір та надання статистики
- * Об'єднує сервіс (бізнес-логіка) та контролер (HTTP-ендпоінти)
- * Імпортується до AppModule для підключення до додатку
+ * Stats Module - responsible for collecting and providing statistics
+ * Combines service (business logic) and controller (HTTP endpoints)
+ * Imported into AppModule for integration into the application
  */
 @Module({
-  controllers: [StatsController], // Контролер обробляє HTTP-запити
-  providers: [StatsService], // Сервіс містить бізнес-логіку
+  controllers: [StatsController], // Controller handles HTTP requests
+  providers: [StatsService], // Service contains business logic
 })
 export class StatsModule {}

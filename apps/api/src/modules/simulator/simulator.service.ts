@@ -1,13 +1,13 @@
-// Підключаємо декоратори NestJS для створення сервісу
+// Import NestJS decorators for creating a service
 import { Injectable, Logger } from '@nestjs/common';
-// Імпортуємо декоратор Interval — він запускає код через задані проміжки часу
+// Import Interval decorator - it runs code at specified intervals
 import { Interval } from '@nestjs/schedule';
-// Підключаємо сервіс бази даних для запису логів
+// Connect database service for log writing
 import { PrismaService } from '../prisma/prisma.service';
-// Імпортуємо тип рівня логу (INFO, WARN, ERROR, DEBUG)
+// Import log level type (INFO, WARN, ERROR, DEBUG)
 import { LogLevel } from '../../../generated/prisma/client';
 
-// Список сервісів, від імені яких генеруватимуться логи
+// List of services from which logs will be generated
 const SERVICES = [
   'api-gateway',
   'auth-service',
@@ -16,8 +16,8 @@ const SERVICES = [
   'notification-service',
 ];
 
-// Повідомлення для кожного рівня логу
-// INFO — звичайні події, WARN — попередження, ERROR — помилки, DEBUG — відлагоджувальна інформація
+// Messages for each log level
+// INFO - regular events, WARN - warnings, ERROR - errors, DEBUG - debug information
 const MESSAGES: Record<LogLevel, string[]> = {
   INFO: [
     'Request processed successfully',
@@ -62,8 +62,8 @@ const MESSAGES: Record<LogLevel, string[]> = {
   ],
 };
 
-// Ймовірності появи кожного рівня логів
-// INFO — 50%, DEBUG — 25%, WARN — 15%, ERROR — 10%
+// Probability weights for each log level
+// INFO - 50%, DEBUG - 25%, WARN - 15%, ERROR - 10%
 const LEVEL_WEIGHTS: [LogLevel, number][] = [
   ['INFO', 0.5],
   ['DEBUG', 0.25],
@@ -71,16 +71,16 @@ const LEVEL_WEIGHTS: [LogLevel, number][] = [
   ['ERROR', 0.1],
 ];
 
-// Декоратор @Injectable() робить клас доступним для впровадження залежностей NestJS
+// @Injectable() decorator makes the class available for NestJS dependency injection
 @Injectable()
 export class SimulatorService {
-  // Логер для виведення повідомлень у консоль сервера
+  // Logger for outputting messages to server console
   private readonly logger = new Logger(SimulatorService.name);
 
-  // Конструктор приймає сервіс бази даних через впровадження залежностей
+  // Constructor accepts database service via dependency injection
   constructor(private readonly prisma: PrismaService) {}
 
-  // Метод обирає випадковий рівень лога на основі заданих ймовірностей
+  // Method selects a random log level based on specified probabilities
   private pickLevel(): LogLevel {
     const r = Math.random();
     let cumulative = 0;
@@ -91,12 +91,12 @@ export class SimulatorService {
     return 'INFO';
   }
 
-  // Метод генерує випадкову IP-адресу у форматі xxx.xxx.xxx.xxx
+  // Method generates a random IP address in xxx.xxx.xxx.xxx format
   private generateIP(): string {
     return `${Math.floor(Math.random() * 200) + 10}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 254) + 1}`;
   }
 
-  // Метод генерує випадковий ідентифікатор запиту у форматі req_xxx...
+  // Method generates a random request identifier in req_xxx... format
   private generateRequestId(): string {
     const chars = 'abcdef0123456789';
     let id = 'req_';
@@ -105,19 +105,19 @@ export class SimulatorService {
     return id;
   }
 
-  // Декоратор @Interval(1000) запускає метод кожну секунду (1000 мс)
+  // @Interval(1000) decorator runs the method every second (1000ms)
   @Interval(1000)
   async generateLiveLog() {
-    // Вибираємо випадковий рівень логу
+    // Select random log level
     const level = this.pickLevel();
-    // Вибираємо випадковий сервіс
+    // Select random service
     const service = SERVICES[Math.floor(Math.random() * SERVICES.length)];
-    // Вибираємо випадкове повідомлення для вибраного рівня
+    // Select random message for the chosen level
     const message =
       MESSAGES[level][Math.floor(Math.random() * MESSAGES[level].length)];
 
     try {
-      // Створюємо новий запис журналу в базі даних
+      // Create new log entry in database
       await this.prisma.log.create({
         data: {
           level,
@@ -128,7 +128,7 @@ export class SimulatorService {
         },
       });
     } catch (error) {
-      // Якщо сталася помилка — записуємо її до лог сервера
+      // If an error occurs - log it to server log
       this.logger.error('Failed to insert live log', error);
     }
   }

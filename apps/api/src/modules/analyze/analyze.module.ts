@@ -3,13 +3,13 @@ import { AnalyzeController } from './analyze.controller';
 import { AnalyzeService } from './analyze.service';
 
 /**
- * Модуль Analyze - відповідає за поглиблений аналіз логів
- * Підтримує синхронний та потоковий (SSE) режими роботи
- * Об'єднує сервіс (бізнес-логіка) та контролер (HTTP-ендпойнти)
- * Імпортується в AppModule для підключення до додатку
+ * Analyze Module - responsible for in-depth log analysis
+ * Supports synchronous and streaming (SSE) operation modes
+ * Combines service (business logic) and controller (HTTP endpoints)
+ * Imported into AppModule for integration into the application
  */
 @Module({
-  controllers: [AnalyzeController], // Контролер обробляє HTTP-запити
-  providers: [AnalyzeService], // Сервіс містить бізнес-логіку
+  controllers: [AnalyzeController], // Controller handles HTTP requests
+  providers: [AnalyzeService], // Service contains business logic
 })
 export class AnalyzeModule {}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-// Використовуємо хук RTK Query для отримання статистики
+// Use RTK Query hook to get statistics
 import { useGetStatsQuery } from "@/lib/store/api"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -22,10 +22,10 @@ import {
 export default function DashboardPage() {
   const [isOnline, setIsOnline] = useState(true)
 
-  // useGetStatsQuery з RTK Query
-  // Хук автоматично керує кешуванням, завантаженням та помилками
-  const { data: stats, isLoading, isError } = useGetStatsQuery(undefined, {
-    // Можна увімкнути фонове оновлення за необхідності:
+  // useGetStatsQuery from RTK Query
+  // Hook automatically handles caching, loading, and errors
+  const { data: stats } = useGetStatsQuery(undefined, {
+    // Can enable background update if needed:
     // pollingInterval: 60000,
   })
 

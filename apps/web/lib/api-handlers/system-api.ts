@@ -1,17 +1,17 @@
-// Сервіс для роботи з System Tasks API
-// Винесені запити для чистоти компонентів та централізації логіки
+// Service for working with System Tasks API
+// Extracted requests for component cleanliness and logic centralization
 
-// Отримуємо базовий URL нашого бекенду
+// Get base URL of our backend
 const API_URL = process.env.NEXT_PUBLIC_API_SERVER || 'http://localhost:4000';
 
 export const SystemApi = {
   /**
-   * Запуск аналізу логів через Worker Thread
-   * Worker Thread виконує важкі обчислення в окремому потоці Node.js
-   * Не блокує основний Event Loop сервера
+   * Run log analysis via Worker Thread
+   * Worker Thread performs heavy computations in a separate Node.js thread
+   * Doesn't block the main server Event Loop
    *
-   * @returns Результати аналізу: кількість проаналізованих записів,
-   *          знайдені помилки, попередження та час виконання
+   * @returns Analysis results: number of analyzed records,
+   *          found errors, warnings, and execution time
    */
   runWorkerAnalysis: async () => {
     const response = await fetch(`${API_URL}/api/system/worker-analysis`, {
@@ -22,12 +22,12 @@ export const SystemApi = {
   },
 
   /**
-   * Запуск експорту через Child Process
-   * Child Process запускає окремий процес ОС для виконання зовнішніх утиліт
-   * Використовує fork для IPC зв'язку (передача об'єктів замість тексту)
-   * Ідеально для архівації, бекапів, виклику системних програм
+   * Run export via Child Process
+   * Child Process launches a separate OS process to run external utilities
+   * Uses fork for IPC communication (object transmission instead of text)
+   * Ideal for archiving, backups, calling system programs
    *
-   * @returns Результати експорту: ім'я файлу, розмір, кількість записів та час виконання
+   * @returns Export results: filename, size, record count, and execution time
    */
   runChildProcessExport: async () => {
     const response = await fetch(`${API_URL}/api/system/child-export`, {
@@ -38,8 +38,8 @@ export const SystemApi = {
   },
 
   /**
-   * Отримуємо список файлів з бекенду
-   * @returns Масив файлів з інформацією про розмір та дату створення
+   * Get list of files from backend
+   * @returns Array of files with size and creation date information
    */
   getExportFiles: async () => {
     const response = await fetch(`${API_URL}/api/system/child-export/files`);
@@ -48,10 +48,10 @@ export const SystemApi = {
   },
 
   /**
-   * Формуємо пряме посилання для скачування
-   * Використовується в <a href="..."> для завантаження файлів
-   * @param filename - ім'я файлу для скачування
-   * @returns Повне URL посилання на ендпоінт скачування
+   * Generate direct download link
+   * Used in <a href="..."> for file downloads
+   * @param filename - name of file to download
+   * @returns Full URL link to download endpoint
    */
   getDownloadUrl: (filename: string) => {
     return `${API_URL}/api/system/child-export/download/${filename}`;

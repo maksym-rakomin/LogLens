@@ -4,36 +4,36 @@ import { GetLogsDto } from '../../common/dto/get-logs.dto';
 import { Log, Prisma } from '../../../generated/prisma/client';
 
 /**
- * Сервіс для роботи з логами
- * Відповідає за отримання логів та аналіз продуктивності запитів
+ * Service for working with logs
+ * Responsible for retrieving logs and analyzing query performance
  */
 @Injectable()
 export class LogsService {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * Отримання списку логів з фільтрацією та пагінацією
-   * Підтримує два режими: offset (класична пагінація по сторінках)
-   * і cursor (швидка пагінація для великих обсягів даних)
+   * Get list of logs with filtering and pagination
+   * Supports two modes: offset (classic page-based pagination)
+   * and cursor (fast pagination for large data volumes)
    */
   async getLogs(dto: GetLogsDto) {
-    // Запускаємо таймер для вимірювання часу виконання запиту
+    // Start timer to measure query execution time
     const startTime = performance.now();
-    // Витягуємо параметри із запиту та приводимо до правильного типу
-    // Query-параметри завжди приходять як рядки, тому явно перетворюємо
+    // Extract parameters from request and convert to correct types
+    // Query parameters always come as strings, so we explicitly convert
     const limit = Number(dto.limit) || 100;
     const page = Number(dto.page) || 1;
     const { mode, level, service, search, from, to, cursor } = dto;
 
-    // Формуємо умови фільтрації для бази даних
+    // Build filter conditions for database
     const where: Prisma.LogWhereInput = {};
-    // Фільтр за рівнем логування (INFO, WARN, ERROR, DEBUG)
+    // Filter by log level (INFO, WARN, ERROR, DEBUG)
     if (level !== 'ALL') where.level = level as any;
-    // Фільтр за назвою сервісу
+    // Filter by service name
     if (service !== 'ALL') where.service = service;
-    // Пошук за текстом повідомлення (без урахування регістру)
+    // Search by message text (case-insensitive)
     if (search) where.message = { contains: search, mode: 'insensitive' };
-    // Фільтр за часовим діапазоном
+    // Filter by time range
     if (from || to) {
       where.timestamp = {};
       if (from) where.timestamp.gte = new Date(from);
@@ -43,13 +43,13 @@ export class LogsService {
     let data: Log[] = [];
     let meta: any = {};
 
-    // Режим класичної постраничної нумерації
+    // Classic page-based pagination mode
     if (mode === 'offset') {
-      // Обчислюємо кількість записів для пропуску
+      // Calculate number of records to skip
       const skip = (page - 1) * limit;
       const startSlice = performance.now();
 
-      // Паралельно отримуємо логи та загальну кількість записів
+      // Get logs and total count in parallel
       const [logs, total] = await Promise.all([
         this.prisma.log.findMany({
           where,
@@ -63,7 +63,7 @@ export class LogsService {
       const sliceTime = performance.now() - startSlice;
 
       data = logs;
-      // Метадані для offset-пагінації
+      // Metadata for offset pagination
       meta = {
         mode: 'offset',
         page,
@@ -74,14 +74,14 @@ export class LogsService {
         paginationTimeMs: Math.round(sliceTime * 100) / 100,
       };
     } else {
-      // Режим cursor-пагинації (більш продуктивний для великих даних)
+      // Cursor pagination mode (more performant for large data)
       const startSlice = performance.now();
 
-      // Перетворюємо cursor з рядка в число (якщо він є)
-      // Query-параметри завжди приходять як рядки, тому явно перетворюємо
+      // Convert cursor from string to number (if present)
+      // Query parameters always come as strings, so we explicitly convert
       const cursorId = cursor ? Number(cursor) : null;
 
-      // Отримуємо на один запис більше, щоб перевірити, чи є ще дані
+      // Get one more record to check if there's more data
       const logs = await this.prisma.log.findMany({
         where,
         take: limit + 1,
@@ -91,16 +91,16 @@ export class LogsService {
       });
       const sliceTime = performance.now() - startSlice;
 
-      // Перевіряємо, чи є ще записи для наступної сторінки
+      // Check if there are more records for next page
       const hasMore = logs.length > limit;
-      if (hasMore) logs.pop(); // Видаляємо зайвий запис
+      if (hasMore) logs.pop(); // Remove extra record
 
-      // ID останнього запису для наступної ітерації
+      // ID of last record for next iteration
       const nextCursor = hasMore ? logs[logs.length - 1].id : null;
       const total = await this.prisma.log.count({ where });
 
       data = logs;
-      // Метадані для cursor-пагінації
+      // Metadata for cursor pagination
       meta = {
         mode: 'cursor',
         limit,
@@ -117,28 +117,28 @@ export class LogsService {
   }
 
   /**
-   * Порівняння продуктивності двох типів пагінації
-   * Виконує EXPLAIN ANALYZE для offset та cursor запитів
-   * та показує різницю в часі виконання
+   * Compare performance of two pagination types
+   * Executes EXPLAIN ANALYZE for offset and cursor queries
+   * and shows the difference in execution time
    */
   async explain(dto: GetLogsDto) {
-    // Беремо 500-ту сторінку для порівняння (на великих сторінках різниця помітніша)
+    // Take page 500 for comparison (difference is more noticeable on large pages)
     const targetPage = dto.page || 500;
     const limit = 100;
     const offsetIdx = (targetPage - 1) * limit;
 
-    // SQL-запит для offset-пагінації з планом виконання
+    // SQL query for offset pagination with execution plan
     const offsetQuery = `EXPLAIN ANALYZE SELECT * FROM logs ORDER BY timestamp DESC LIMIT ${limit} OFFSET ${offsetIdx}`;
-    // SQL-запит для курсорної пагінації з планом виконання
+    // SQL query for cursor pagination with execution plan
     const cursorQuery = `EXPLAIN ANALYZE SELECT * FROM logs WHERE id < (SELECT id FROM logs ORDER BY id DESC LIMIT 1 OFFSET ${offsetIdx}) ORDER BY id DESC LIMIT ${limit}`;
 
-    // Паралельно виконуємо обидва запити для порівняння
+    // Execute both queries in parallel for comparison
     const [offsetExplain, cursorExplain] = await Promise.all([
       this.prisma.$queryRawUnsafe<{ 'QUERY PLAN': string }[]>(offsetQuery),
       this.prisma.$queryRawUnsafe<{ 'QUERY PLAN': string }[]>(cursorQuery),
     ]);
 
-    // Функція для вилучення часу виконання з плану запиту
+    // Function to extract execution time from query plan
     const extractTime = (explain: any[]) => {
       const execTimeLine = explain.find((row) =>
         row['QUERY PLAN'].includes('Execution Time'),
@@ -152,7 +152,7 @@ export class LogsService {
     const offsetTime = extractTime(offsetExplain);
     const cursorTime = extractTime(cursorExplain);
 
-    // Повертаємо детальну інформацію про продуктивність обох методів
+    // Return detailed performance information for both methods
     return {
       targetPage,
       offset: {

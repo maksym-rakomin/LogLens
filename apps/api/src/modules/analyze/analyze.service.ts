@@ -3,22 +3,22 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Observable, Subscriber } from 'rxjs';
 
 /**
- * Сервіс для аналізу логів
- * Підтримує два режими: синхронний (миттєва відповідь) та потоковий (SSE)
- * Аналізує помилки, розподіл за рівнями, топ IP-адрес
+ * Service for log analysis
+ * Supports two modes: synchronous (instant response) and streaming (SSE)
+ * Analyzes errors, distribution by levels, top IP addresses
  */
 @Injectable()
 export class AnalyzeService {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * Синхронний аналіз логів
-   * Миттєво повертає повну статистику
-   * Використовується для невеликих обсягів даних
+   * Synchronous log analysis
+   * Returns complete statistics immediately
+   * Used for small data volumes
    */
   async analyzeSync() {
     const start = performance.now();
-    // Ключові слова для пошуку помилок у повідомленнях логів
+    // Keywords for searching errors in log messages
     const errorKeywords = [
       'timeout',
       'failed',
@@ -26,14 +26,14 @@ export class AnalyzeService {
       'crashed',
       'error',
     ];
-    // Формуємо умову пошуку: повідомлення містить будь-яке з ключових слів
+    // Build search condition: message contains any of the keywords
     const errorWhere = {
       OR: errorKeywords.map((kw) => ({
         message: { contains: kw, mode: 'insensitive' as const },
       })),
     };
 
-    // Паралельно виконуємо 6 запитів для збору всієї статистики
+    // Execute 6 queries in parallel to collect all statistics
     const [
       totalLogs,
       uniqueIpsResult,
@@ -42,19 +42,19 @@ export class AnalyzeService {
       serviceGroup,
       topIpsGroup,
     ] = await Promise.all([
-      // Загальна кількість логів
+      // Total log count
       this.prisma.log.count(),
-      // Кількість унікальних IP-адрес
+      // Count of unique IP addresses
       this.prisma.$queryRaw<
         { count: bigint }[]
       >`SELECT COUNT(DISTINCT ip) FROM logs`,
-      // Кількість записів з помилками (за ключовими словами)
+      // Count of entries with errors (by keywords)
       this.prisma.log.count({ where: errorWhere }),
-      // Розподіл за рівнями логування
+      // Distribution by log levels
       this.prisma.log.groupBy({ by: ['level'], _count: true }),
-      // Розподіл за сервісами
+      // Distribution by services
       this.prisma.log.groupBy({ by: ['service'], _count: true }),
-      // Топ-10 IP-адресів за кількістю запитів
+      // Top 10 IP addresses by request count
       this.prisma.log.groupBy({
         by: ['ip'],
         _count: { ip: true },
@@ -63,7 +63,7 @@ export class AnalyzeService {
       }),
     ]);
 
-    // Перетворимо результати у зручний формат
+    // Convert results to convenient format
     const levelCounts = levelGroup.reduce(
       (acc, curr) => ({ ...acc, [curr.level]: curr._count }),
       {},
@@ -74,8 +74,7 @@ export class AnalyzeService {
     );
     const topIPs = topIpsGroup.map((g) => ({ ip: g.ip, count: g._count.ip }));
 
-    // Повертаємо повний звіт із часом виконання
-    // Возвращаем полный отчёт с временем выполнения
+    // Return full report with execution time
     return {
       mode: 'sync',
       totalLogs,
@@ -90,24 +89,24 @@ export class AnalyzeService {
   }
 
   /**
-   * Потоковий аналіз логів через Server-Sent Events (SSE)
-   * Відправляє клієнту проміжні результати по мірі готовності
-   * Дозволяє показувати прогрес аналізу в реальному часі
+   * Streaming log analysis via Server-Sent Events (SSE)
+   * Sends intermediate results to client as they become ready
+   * Allows showing analysis progress in real-time
    */
   analyzeStream(): Observable<MessageEvent> {
     return new Observable((subscriber: Subscriber<MessageEvent>) => {
       const totalStart = performance.now();
-      // Допоміжна функція для надсилання кроків аналізу клієнту
+      // Helper function to send analysis steps to client
       const sendStep = (step: string, data: any) =>
         subscriber.next({ data: { step, ...data } } as MessageEvent);
 
       (async () => {
         try {
-          // Крок 1: Отримуємо загальну кількість логів
+          // Step 1: Get total log count
           const totalLogs = await this.prisma.log.count();
           sendStep('start', { message: 'Starting analysis...', totalLogs });
 
-          // Крок 2: Підрахунок унікальних IP-адрес (20% прогрес)
+          // Step 2: Count unique IP addresses (20% progress)
           const uniqueIpsResult = await this.prisma.$queryRaw<
             { count: bigint }[]
           >`SELECT COUNT(DISTINCT ip) FROM logs`;
@@ -117,7 +116,7 @@ export class AnalyzeService {
             progress: 20,
           });
 
-          // Крок 3: Шукаємо записи з помилками за ключовими словами (40% прогрес)
+          // Step 3: Search for entries with errors by keywords (40% progress)
           const errorKeywords = [
             'timeout',
             'failed',
@@ -139,7 +138,7 @@ export class AnalyzeService {
             progress: 40,
           });
 
-          // Крок 4: Розраховуємо розподіл за рівнями логування (60% прогрес)
+          // Step 4: Calculate distribution by log levels (60% progress)
           const levelGroup = await this.prisma.log.groupBy({
             by: ['level'],
             _count: true,
@@ -154,7 +153,7 @@ export class AnalyzeService {
             progress: 60,
           });
 
-          // Крок 5: Розрахунок розподілу за сервісами (80% прогресу)
+          // Step 5: Calculate distribution by services (80% progress)
           const serviceGroup = await this.prisma.log.groupBy({
             by: ['service'],
             _count: true,
@@ -169,7 +168,7 @@ export class AnalyzeService {
             progress: 80,
           });
 
-          // Крок 6: Отримуємо топ-10 IP-адрес і завершуємо аналіз (100% прогрес)
+          // Step 6: Get top 10 IP addresses and complete analysis (100% progress)
           const topIpsGroup = await this.prisma.log.groupBy({
             by: ['ip'],
             _count: { ip: true },

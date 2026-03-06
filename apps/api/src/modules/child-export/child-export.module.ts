@@ -3,18 +3,18 @@ import { ChildExportController } from './child-export.controller';
 import { ChildExportService } from './child-export.service';
 
 /**
- * Модуль Child Export - відповідає за експорт та архівацію через Child Process
+ * Child Export Module - responsible for export and archiving via Child Process
  *
- * Child Process - це запуск окремих процесів операційної системи
- * Використовується коли потрібно:
- * - Запустити зовнішню програму (tar, zip, pg_dump, ffmpeg)
- * - Виконати скрипт на іншій мові (Python, Bash, Go)
- * - Ізолювати завдання, яке може впасти без впливу на основний процес
+ * Child Process - running separate operating system processes
+ * Used when you need to:
+ * - Run an external program (tar, zip, pg_dump, ffmpeg)
+ * - Execute a script in another language (Python, Bash, Go)
+ * - Isolate a task that might crash without affecting the main process
  *
- * На відміну від Worker Threads, Child Process:
- * - Працює як окремий процес ОС з власною пам'яттю
- * - Може запускати будь-які програми, доступні в системі
- * - Важчий за ресурсами, але більш ізольований
+ * Unlike Worker Threads, Child Process:
+ * - Runs as a separate OS process with its own memory
+ * - Can run any programs available in the system
+ * - Heavier on resources, but more isolated
  */
 @Module({
   controllers: [ChildExportController],

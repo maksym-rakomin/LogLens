@@ -10,38 +10,38 @@ import { WorkerAnalysisModule } from './modules/worker-analysis/worker-analysis.
 import { ChildExportModule } from './modules/child-export/child-export.module';
 
 /**
- * Корневий модуль застосунку
-* Об'єднує всі функціональні модулі в єдине ціле
-*
-* Структура застосунку:
-* - ConfigModule - завантаження змінних оточення (.env)
-* - ScheduleModule - планувальник завдань (cron)
-* - PrismaModule - підключення до бази даних
-* - LogsModule - робота з логами (отримання, фільтрація, пагінація)
-* - StatsModule - статистика та агрегація даних
-* - AnalyzeModule - поглиблений аналіз (синхронний та потоковий)
-* - SimulatorModule - симулятор логів (генерація тестових даних)
-* - WorkerAnalysisModule - аналіз логів через Worker Threads (важкі обчислення)
-* - ChildExportModule - експорт через Child Process (зовнішні процеси ОС)
+ * Root module of the application
+ * Combines all functional modules into a single unit
+ *
+ * Application structure:
+ * - ConfigModule - loading environment variables (.env)
+ * - ScheduleModule - task scheduler (cron)
+ * - PrismaModule - database connection
+ * - LogsModule - working with logs (retrieval, filtering, pagination)
+ * - StatsModule - statistics and data aggregation
+ * - AnalyzeModule - in-depth analysis (synchronous and streaming)
+ * - SimulatorModule - log simulator (test data generation)
+ * - WorkerAnalysisModule - log analysis via Worker Threads (heavy computations)
+ * - ChildExportModule - export via Child Process (external OS processes)
  */
 @Module({
   imports: [
-    // Модуль конфігурації - робить доступним process.env у всьому додатку
+    // Configuration module - makes process.env available throughout the application
     ConfigModule.forRoot(),
-    // Модуль планувальника - дозволяє запускати завдання за розкладом (cron)
+    // Scheduler module - allows running tasks on schedule (cron)
     ScheduleModule.forRoot(),
     PrismaModule,
-    // Модуль логів - ендпоінти /api/logs та /api/logs/explain
+    // Logs module - endpoints /api/logs and /api/logs/explain
     LogsModule,
-    // Модуль статистики — ендпоінт /api/stats
+    // Statistics module - endpoint /api/stats
     StatsModule,
-    // Модуль аналізу - ендпойнт /api/analyze (sync/stream)
+    // Analysis module - endpoint /api/analyze (sync/stream)
     AnalyzeModule,
-    // Модуль симулятора - генерує тестові лоґи для демонстрації
+    // Simulator module - generates test logs for demonstration
     SimulatorModule,
-    // Модуль Worker Analysis - запуск важких обчислень у Worker Threads
+    // Worker Analysis module - running heavy computations in Worker Threads
     WorkerAnalysisModule,
-    // Модуль Child Export - запуск зовнішніх процесів для експорту/архівації
+    // Child Export module - running external processes for export/archiving
     ChildExportModule,
   ],
 })

@@ -2,18 +2,18 @@ import { Controller, Get } from '@nestjs/common';
 import { StatsService } from './stats.service';
 
 /**
- * Контролер для отримання статистики за логами
- * Обробляє HTTP-запити на ендпоінт /api/stats
+ * Controller for retrieving log statistics
+ * Handles HTTP requests to /api/stats endpoint
  */
 @Controller('api/stats')
 export class StatsController {
   constructor(private readonly statsService: StatsService) {}
 
   /**
-   * Отримання повної статистики за всіма логами
+   * Get complete statistics for all logs
    * GET /api/stats
-   * Повертає: загальну кількість логів, унікальні IP, розподіл за рівнями
-   * та сервісами, часові графіки (за днями та годинами)
+   * Returns: total log count, unique IPs, distribution by levels
+   * and services, time-based charts (daily and hourly)
    */
   @Get()
   getStats() {

@@ -1,12 +1,12 @@
-// Імпортуємо декоратор Module з NestJS — він створює модуль (блок коду з певною функціональністю)
+// Import Module decorator from NestJS - it creates a module (code block with specific functionality)
 import { Module } from '@nestjs/common';
-// Імпортуємо сервіс симулятора, який буде додавати лоґи
+// Import simulator service that will add logs
 import { SimulatorService } from './simulator.service';
 
-// Декоратор @Module описує модуль та його компоненти
+// @Module decorator describes the module and its components
 @Module({
-  // providers — список сервісів, які будуть доступні в цьому модулі
+  // providers - list of services that will be available in this module
   providers: [SimulatorService],
 })
-// Експортуємо клас модуля для використання в інших файлах
+// Export module class for use in other files
 export class SimulatorModule {}

@@ -3,56 +3,56 @@ import { Type } from 'class-transformer';
 import { LogLevel } from '../../../generated/prisma/client';
 
 /**
- * DTO (Data Transfer Object) для параметрів запиту логів
- * Автоматично валідує та перетворює дані із запиту
- * Використовується в контролерах для обробки query-параметрів
+ * DTO (Data Transfer Object) for log request parameters
+ * Automatically validates and transforms request data
+ * Used in controllers for handling query parameters
  */
 export class GetLogsDto {
-  // Режим пагінації: 'cursor' (швидкий) або 'offset' (класичний)
+  // Pagination mode: 'cursor' (fast) or 'offset' (classic)
   @IsOptional()
   @IsString()
   mode?: 'cursor' | 'offset' = 'cursor';
 
-  // Кількість записів на сторінці (мінімум 1)
+  // Number of records per page (minimum 1)
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   limit?: number = 100;
 
-  // Рівень логування для фільтрації (INFO, WARN, ERROR, DEBUG) або 'ALL' для всіх
+  // Log level for filtering (INFO, WARN, ERROR, DEBUG) or 'ALL' for all
   @IsOptional()
   @IsString()
   level?: LogLevel | 'ALL' = 'ALL';
 
-  // Назва сервісу для фільтрації або 'ALL' для всіх
+  // Service name for filtering or 'ALL' for all
   @IsOptional()
   @IsString()
   service?: string = 'ALL';
 
-  // Пошуковий запит для пошуку в тексті повідомлення
+  // Search query for searching in message text
   @IsOptional()
   @IsString()
   search?: string = '';
 
-  // Початок тимчасового діапазону (формат ISO 8601)
+  // Start of time range (ISO 8601 format)
   @IsOptional()
   @IsString()
   from?: string = '';
 
-  // Кінець часового діапазону (формат ISO 8601)
+  // End of time range (ISO 8601 format)
   @IsOptional()
   @IsString()
   to?: string = '';
 
-  // Номер сторінки для offset-пагінації (мінімум 1)
+  // Page number for offset pagination (minimum 1)
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number = 1;
 
-  // Ідентифікатор запису для cursor-пагинации (починати з цього запису)
+  // Record ID for cursor pagination (start from this record)
   @IsOptional()
   @Type(() => Number)
   @IsInt()

@@ -3,12 +3,12 @@ import { LogsController } from './logs.controller';
 import { LogsService } from './logs.service';
 
 /**
- * Модуль Logs - відповідає за роботу з логами
- * Об'єднує сервіс (бізнес-логіка) та контролер (HTTP-ендпоінти)
- * Імпортується в AppModule для підключення до застосунку
+ * Logs Module - responsible for working with logs
+ * Combines service (business logic) and controller (HTTP endpoints)
+ * Imported into AppModule for integration into the application
  */
 @Module({
-  controllers: [LogsController], // Контролер обробляє HTTP-запити
-  providers: [LogsService], // Сервіс містить бізнес-логіку
+  controllers: [LogsController], // Controller handles HTTP requests
+  providers: [LogsService], // Service contains business logic
 })
 export class LogsModule {}

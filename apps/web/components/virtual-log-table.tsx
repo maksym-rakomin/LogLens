@@ -69,7 +69,7 @@ interface VirtualLogTableProps {
   isFetching?: boolean
   onLoadMore?: () => void
   hasMore?: boolean
-  // Props для offset-пагінації
+  // Props for offset pagination
   page?: number
   totalPages?: number
   onPrevPage?: () => void

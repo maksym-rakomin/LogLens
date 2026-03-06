@@ -3,15 +3,15 @@ import { LogsService } from './logs.service';
 import { GetLogsDto } from '../../common/dto/get-logs.dto';
 
 /**
- * Контролер для керування логами
- * Обробляє HTTP-запити на ендпоінти /api/logs
+ * Controller for managing logs
+ * Handles HTTP requests to /api/logs endpoints
  */
 @Controller('api/logs')
 export class LogsController {
   constructor(private readonly logsService: LogsService) {}
 
   /**
-   * Отримання списку логів із фільтрацією та пагінацією
+   * Get list of logs with filtering and pagination
    * GET /api/logs?mode=cursor&limit=50&level=ERROR&service=auth&search=error
    */
   @Get()
@@ -20,9 +20,9 @@ export class LogsController {
   }
 
   /**
-   * Порівняння продуктивності пагінації
+   * Compare pagination performance
    * GET /api/logs/explain?page=500
-   * Повертає план виконання SQL-запитів для offset та cursor пагінації
+   * Returns SQL query execution plans for offset and cursor pagination
    */
   @Get('explain')
   explain(@Query() query: GetLogsDto) {

@@ -1,4 +1,4 @@
-// Компонент для демонстрації різниці між Worker Threads та Child Process
+// Component to demonstrate the difference between Worker Threads and Child Process
 "use client"
 
 import { useState, useEffect } from "react"
@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Cpu, Archive, Play, CheckCircle2, Loader2, Download, FileArchive, Clock } from "lucide-react"
 
-// Типізація для файлу історії
+// Type definition for history file
 interface ExportFile {
   name: string;
   sizeMB: string;
@@ -15,40 +15,40 @@ interface ExportFile {
 }
 
 /**
- * Панель системних задач
- * Демонструє два підходи до виконання важких завдань у Node.js:
+ * System Tasks Panel
+ * Demonstrates two approaches to executing heavy tasks in Node.js:
  *
- * 1. Worker Threads - потоки всередині Node.js для важких обчислень
- *    - Використовують спільну пам'ять
- *    - Легші за ресурсами
- *    - Ідеально для обробки даних, аналізу, математичних обчислень
+ * 1. Worker Threads - threads inside Node.js for heavy computations
+ *    - Use shared memory
+ *    - Lighter on resources
+ *    - Ideal for data processing, analysis, mathematical computations
  *
- * 2. Child Process - окремі процеси ОС для запуску зовнішніх програм
- *    - Повна ізоляція процесів
- *    - Можуть запускати будь-які системні утиліти
- *    - Ідеально для архівації, бекапів, виклику tar/zip/pg_dump
+ * 2. Child Process - separate OS processes for running external programs
+ *    - Full process isolation
+ *    - Can run any system utilities
+ *    - Ideal for archiving, backups, calling tar/zip/pg_dump
  */
 export function SystemTasksPanel() {
-  // Стейт для Worker Thread (аналіз логів)
+  // State for Worker Thread (log analysis)
   const [workerLoading, setWorkerLoading] = useState(false)
   const [workerResult, setWorkerResult] = useState<any>(null)
 
-  // Стейт для Child Process (експорт/архівація)
+  // State for Child Process (export/archiving)
   const [childLoading, setChildLoading] = useState(false)
   const [childResult, setChildResult] = useState<any>(null)
 
-  // Стейт для історії файлів
+  // State for file history
   const [historyFiles, setHistoryFiles] = useState<ExportFile[]>([])
   const [historyLoading, setHistoryLoading] = useState(true)
 
-  // Завантажуємо список файлів при монтуванні компонента
+  // Load file list on component mount
   useEffect(() => {
     fetchHistory()
   }, [])
 
   /**
-   * Функція для оновлення списку файлів
-   * Викликається при завантаженні компонента та після успішного експорту
+   * Function to refresh file list
+   * Called on component mount and after successful export
    */
   const fetchHistory = async () => {
     try {
@@ -63,8 +63,8 @@ export function SystemTasksPanel() {
   }
 
   /**
-   * Запуск Worker Thread
-   * Викликає API для запуску аналізу логів через Worker Thread
+   * Start Worker Thread
+   * Calls API to run log analysis via Worker Thread
    */
   const handleWorkerStart = async () => {
     setWorkerLoading(true)
@@ -80,9 +80,9 @@ export function SystemTasksPanel() {
   }
 
   /**
-   * Запуск Child Process
-   * Викликає API для запуску експорту через Child Process
-   * Після успішного завершення оновлює список історії
+   * Start Child Process
+   * Calls API to run export via Child Process
+   * Updates history list after successful completion
    */
   const handleChildStart = async () => {
     setChildLoading(true)
@@ -90,7 +90,7 @@ export function SystemTasksPanel() {
     try {
       const data = await SystemApi.runChildProcessExport()
       setChildResult(data)
-      // Після успішного створення архіву, оновлюємо список файлів внизу
+      // After successful archive creation, refresh file list at bottom
       fetchHistory()
     } catch (error) {
       console.error(error)
@@ -102,10 +102,10 @@ export function SystemTasksPanel() {
   return (
     <div className="p-4 flex flex-col gap-4 h-full overflow-auto">
 
-      {/* Верхній ряд з двома основними картками */}
+      {/* Top row with two main cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-        {/* Картка Worker Threads */}
+        {/* Worker Threads card */}
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-primary">
@@ -129,7 +129,7 @@ export function SystemTasksPanel() {
               )}
             </Button>
 
-            {/* Відображення результату Worker'а */}
+            {/* Display Worker result */}
             {workerResult && (
               <div className="p-4 rounded-md bg-muted/50 border border-border space-y-2 text-sm font-mono">
                 <div className="flex items-center text-green-500 mb-2">
@@ -152,7 +152,7 @@ export function SystemTasksPanel() {
           </CardContent>
         </Card>
 
-        {/* Картка Child Process */}
+        {/* Child Process card */}
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-primary">
@@ -188,7 +188,7 @@ export function SystemTasksPanel() {
                 <p><span className="text-muted-foreground">Records:</span> {childResult.records}</p>
                 <p><span className="text-muted-foreground">Execution Time:</span> {childResult.timeTakenMs} ms</p>
 
-                {/* Кнопка для миттєвого скачування щойно створеного файлу */}
+                {/* Button for instant download of newly created file */}
                 <Button
                   variant="outline"
                   size="sm"
@@ -205,7 +205,7 @@ export function SystemTasksPanel() {
         </Card>
       </div>
 
-      {/* Нижній блок: Історія експорту */}
+      {/* Bottom section: Export History */}
       <Card className="bg-card border-border mt-2">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-primary">
@@ -227,7 +227,7 @@ export function SystemTasksPanel() {
             </div>
           ) : (
             <div className="space-y-2">
-              {/* Рендеримо список файлів */}
+              {/* Render file list */}
               {historyFiles.map((file) => (
                 <div
                   key={file.name}
@@ -245,7 +245,7 @@ export function SystemTasksPanel() {
                     </div>
                   </div>
 
-                  {/* Кнопка скачування для кожного файлу в історії */}
+                  {/* Download button for each file in history */}
                   <Button variant="ghost" size="icon" asChild title="Download">
                     <a href={SystemApi.getDownloadUrl(file.name)} download>
                       <Download className="size-4 text-primary" />

@@ -1,15 +1,15 @@
-// Компонент панелі логів з використанням RTK Query для завантаження даних
-// Підтримує нескінченний скрол (Infinite Scroll) зі склеюванням даних
+// Logs panel component using RTK Query for loading data
+// Supports infinite scroll with data merging
 "use client"
 
 import { useCallback, useState } from "react"
-// Використовуємо хук RTK Query для отримання логів
+// Use RTK Query hook to get logs
 import { useGetLogsQuery } from "@/lib/store/api"
 import type { LogFilters as LogFiltersType } from "@/lib/types"
 import { LogFilters } from "@/components/log-filters"
 import { VirtualLogTable } from "@/components/virtual-log-table"
 
-// Фільтри за замовчуванням для відображення логів
+// Default filters for displaying logs
 const DEFAULT_FILTERS: LogFiltersType = {
   level: "ALL",
   service: "ALL",
@@ -23,41 +23,41 @@ const DEFAULT_FILTERS: LogFiltersType = {
 }
 
 export function LogsPanel() {
-  // 1. Стан фільтрів для керування запитами до API
+  // 1. Filter state for controlling API requests
   const [filters, setFilters] = useState<LogFiltersType>(DEFAULT_FILTERS)
 
-  // 2. Отримуємо дані через RTK Query
-  // isFetching буде true щоразу, коли ми довантажуємо нові дані
+  // 2. Get data via RTK Query
+  // isFetching will be true every time we load new data
   const { data, isLoading, isFetching } = useGetLogsQuery(filters, {
-    // Відключаємо ревалідацію при фокусі вікна
+    // Disable refetch on window focus
     refetchOnFocus: false,
   })
 
-  // 3. Обробник для кнопки "Load More" (Cursor Mode)
-  // RTK Query зробить запит і завдяки функції merge() додасть нові логи вниз списку
+  // 3. Handler for "Load More" button (Cursor Mode)
+  // RTK Query will make a request and thanks to merge() function will append new logs to the bottom of the list
   const handleLoadMore = () => {
     if (data?.meta.hasMore && data.meta.nextCursor) {
-      // Просто оновлюємо cursor у стейті
+      // Just update cursor in state
       setFilters(prev => ({ ...prev, cursor: data.meta.nextCursor }))
     }
   }
 
-  // 4. Обробники для класичної пагінації (Offset Mode)
+  // 4. Handlers for classic pagination (Offset Mode)
   const handlePrevPage = () => setFilters(f => ({ ...f, page: Math.max(1, (f.page ?? 1) - 1) }))
   const handleNextPage = () => setFilters(f => ({ ...f, page: (f.page ?? 1) + 1 }))
 
-  // 5. Обробник зміни будь-якого фільтра (наприклад, користувач щось ввів у пошук)
-  // При зміні фільтрів обов'язково скидаємо page і cursor для очищення списку
+  // 5. Handler for any filter change (e.g., user types in search)
+  // When filters change, we must reset page and cursor to clear the list
   const handleFiltersChange = useCallback((newFilters: LogFiltersType) => {
     setFilters(prev => ({
       ...prev,
       ...newFilters,
-      page: 1,           // Обов'язково скидаємо сторінку
-      cursor: undefined  // Обов'язково скидаємо курсор, щоб список очистився
+      page: 1,           // Reset page
+      cursor: undefined  // Reset cursor to clear the list
     }))
   }, [])
 
-  // Перевіряємо чи є ще дані для завантаження
+  // Check if there's more data to load
   const hasMore =
     filters.mode === "cursor"
       ? data?.meta?.hasMore ?? false
@@ -65,21 +65,21 @@ export function LogsPanel() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      {/* Компонент з фільтрами (рівень, сервіс, пошук тощо) */}
+      {/* Filters component (level, service, search, etc.) */}
       <LogFilters
         filters={filters}
         onFiltersChange={handleFiltersChange}
         total={data?.meta?.total ?? 0}
         queryTimeMs={data?.meta?.queryTimeMs ?? 0}
       />
-      {/* Таблиця з логами з віртуалізацією для продуктивності */}
+      {/* Log table with virtualization for performance */}
       <VirtualLogTable
         entries={data?.data ?? []}
         isLoading={isLoading}
         isFetching={isFetching}
         onLoadMore={filters.mode === "cursor" ? handleLoadMore : undefined}
         hasMore={hasMore}
-        // Props для offset-пагінації
+        // Props for offset pagination
         page={filters.page ?? 1}
         totalPages={data?.meta?.totalPages ?? 1}
         onPrevPage={filters.mode === "offset" ? handlePrevPage : undefined}

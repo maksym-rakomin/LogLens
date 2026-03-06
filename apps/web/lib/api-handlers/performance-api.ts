@@ -1,17 +1,17 @@
-// Сервіс для роботи з System Tasks API
-// Винесені запити для чистоти компонентів та централізації логіки
+// Service for working with System Tasks API
+// Extracted requests for component cleanliness and logic centralization
 
-// Отримуємо базовий URL нашого бекенду
+// Get base URL of our backend
 const API_URL = process.env.NEXT_PUBLIC_API_SERVER || 'http://localhost:4000';
 
 export const PerformanceApi = {
   /**
-   * Запуск аналізу логів через Worker Thread
-   * Worker Thread виконує важкі обчислення в окремому потоці Node.js
-   * Не блокує основний Event Loop сервера
+   * Run log analysis via Worker Thread
+   * Worker Thread performs heavy computations in a separate Node.js thread
+   * Doesn't block the main server Event Loop
    *
-   * @returns Результати аналізу: кількість проаналізованих записів,
-   *          знайдені помилки, попередження та час виконання
+   * @returns Analysis results: number of analyzed records,
+   *          found errors, warnings, and execution time
    */
   getAnalyzeSync: async () => {
     const response = await fetch(`${API_URL}/api/analyze?mode=sync`, {

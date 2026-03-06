@@ -3,19 +3,19 @@ import type { Response } from 'express';
 import { ChildExportService } from './child-export.service';
 
 /**
- * Контролер для запуску експорту через Child Process
- * Ендпоінт: POST /api/system/child-export
+ * Controller for running export via Child Process
+ * Endpoint: POST /api/system/child-export
  *
- * Child Process використовується для запуску зовнішніх програм
- * на рівні операційної системи (архіватори, бекап утиліти, тощо)
+ * Child Process is used to run external programs
+ * at the operating system level (archivers, backup utilities, etc.)
  */
 @Controller('api/system/child-export')
 export class ChildExportController {
   constructor(private readonly exportService: ChildExportService) {}
 
   /**
-   * Запускає експорт/архівацію через Child Process
-   * @returns Результати експорту з ім'ям файлу, розміром та часом виконання
+   * Run export/archiving via Child Process
+   * @returns Export results with filename, size, and execution time
    */
   @Post()
   async startExport() {
@@ -23,8 +23,8 @@ export class ChildExportController {
   }
 
   /**
-   * Ендпоінт для отримання списку файлів у папці exports
-   * @returns Масив файлів з інформацією про розмір та дату створення
+   * Endpoint to get list of files in exports folder
+   * @returns Array of files with size and creation date information
    */
   @Get('files')
   async getFiles() {
@@ -32,20 +32,20 @@ export class ChildExportController {
   }
 
   /**
-   * Ендпоінт для завантаження конкретного файлу
-   * @param filename - ім'я файлу для скачування
-   * @param res - об'єкт відповіді Express для віддачі файлу
+   * Endpoint to download a specific file
+   * @param filename - name of the file to download
+   * @param res - Express response object for serving the file
    */
   @Get('download/:filename')
   downloadFile(@Param('filename') filename: string, @Res() res: Response) {
-    // Отримуємо безпечний шлях до файлу (захист від Path Traversal)
+    // Get safe file path (protection against Path Traversal)
     const filePath = this.exportService.getFilePathForDownload(filename);
 
-    // Використовуємо вбудований метод Express для віддачі файлу клієнту
-    // Він автоматично встановить правильні заголовки (Content-Disposition: attachment)
+    // Use Express built-in method to serve file to client
+    // It automatically sets correct headers (Content-Disposition: attachment)
     res.download(filePath, filename, (err) => {
       if (err) {
-        // Якщо клієнт скасував завантаження або сталася помилка
+        // If client canceled download or an error occurred
         console.error('Download error:', err);
       }
     });
