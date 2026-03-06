@@ -2,9 +2,9 @@
 
 import { useCallback, useState } from "react"
 import { Search, X, Filter } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Input } from "@workspace/ui/components/input"
+import { Button } from "@workspace/ui/components/button"
+import { Badge } from "@workspace/ui/components/badge"
 import type { LogFilters as LogFiltersType, LogLevel } from "@/lib/types"
 
 const LEVELS: Array<LogLevel | "ALL"> = ["ALL", "INFO", "WARN", "ERROR", "DEBUG"]

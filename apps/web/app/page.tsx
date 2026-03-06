@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 // Use RTK Query hook to get statistics
 import { useGetStatsQuery } from "@/lib/store/api"
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { LogsPanel } from "@/components/logs-panel"
 import { AnalyticsPanel } from "@/components/analytics-panel"

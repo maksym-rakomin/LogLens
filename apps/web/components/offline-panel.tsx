@@ -1,10 +1,10 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@workspace/ui/components/card"
+import { Button } from "@workspace/ui/components/button"
+import { Badge } from "@workspace/ui/components/badge"
+import { Input } from "@workspace/ui/components/input"
 import type { LogEntry, OfflineSavedSearch } from "@/lib/types"
 import { Database, Download, Trash2, HardDrive, RefreshCw } from "lucide-react"
 

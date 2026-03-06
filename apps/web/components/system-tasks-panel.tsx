@@ -3,8 +3,8 @@
 
 import { useState, useEffect } from "react"
 import { SystemApi } from "@/lib/api-handlers/system-api"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
+import { Button } from "@workspace/ui/components/button"
 import { Cpu, Archive, Play, CheckCircle2, Loader2, Download, FileArchive, Clock } from "lucide-react"
 
 // Type definition for history file

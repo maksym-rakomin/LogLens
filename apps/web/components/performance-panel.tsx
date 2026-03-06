@@ -5,10 +5,10 @@
 import { useCallback, useState } from "react"
 // Use RTK Query hook to get EXPLAIN analysis
 import { useGetExplainQuery } from "@/lib/store/api"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@workspace/ui/components/card"
+import { Button } from "@workspace/ui/components/button"
+import { Badge } from "@workspace/ui/components/badge"
+import { Progress } from "@workspace/ui/components/progress"
 import type { ExplainResponse, AnalyzeStep } from "@/lib/types"
 import { ArrowRight, Play, Zap, Clock, Terminal } from "lucide-react"
 import {PerformanceApi} from "@/lib/api-handlers/performance-api";

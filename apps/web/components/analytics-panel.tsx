@@ -3,8 +3,6 @@
 
 // Use RTK Query hook to get statistics
 import { useGetStatsQuery } from "@/lib/store/api"
-import type { StatsResponse } from "@/lib/types"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   AreaChart,
   Area,
@@ -19,6 +17,7 @@ import {
   Pie,
   Cell,
 } from "recharts"
+import {Card, CardContent, CardHeader, CardTitle} from "@workspace/ui/components/card";
 
 // Colors for different log levels (INFO, WARN, ERROR, DEBUG)
 const LEVEL_COLORS: Record<string, string> = {
