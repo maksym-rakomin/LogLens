@@ -8,7 +8,7 @@ import {
   useState,
   memo,
 } from "react"
-import type { LogEntry, LogLevel } from "@/lib/types"
+import type { LogEntry, LogLevel } from "@workspace/types"
 
 const ROW_HEIGHT = 32
 const OVERSCAN = 10

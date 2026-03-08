@@ -5,7 +5,7 @@ import { Search, X, Filter } from "lucide-react"
 import { Input } from "@workspace/ui/components/input"
 import { Button } from "@workspace/ui/components/button"
 import { Badge } from "@workspace/ui/components/badge"
-import type { LogFilters as LogFiltersType, LogLevel } from "@/lib/types"
+import type { LogFilters as LogFiltersType, LogLevel } from "@workspace/types"
 
 const LEVELS: Array<LogLevel | "ALL"> = ["ALL", "INFO", "WARN", "ERROR", "DEBUG"]
 const SERVICES = [

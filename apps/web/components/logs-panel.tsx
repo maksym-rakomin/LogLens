@@ -5,7 +5,7 @@
 import { useCallback, useState } from "react"
 // Use RTK Query hook to get logs
 import { useGetLogsQuery } from "@/lib/store/api"
-import type { LogFilters as LogFiltersType } from "@/lib/types"
+import type { LogFilters as LogFiltersType } from "@workspace/types"
 import { LogFilters } from "@/components/log-filters"
 import { VirtualLogTable } from "@/components/virtual-log-table"
 

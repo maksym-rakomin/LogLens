@@ -1,6 +1,6 @@
 // API Slice for RTK Query - describes all backend endpoints
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { LogsResponse, LogFilters, StatsResponse, ExplainResponse } from '@/lib/types';
+import type { LogsResponse, LogFilters, StatsResponse, ExplainResponse } from '@workspace/types';
 
 // Create API client with base URL from environment variables
 export const api = createApi({

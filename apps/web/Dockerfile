@@ -12,6 +12,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 # Copy workspace packages configs
 COPY packages/eslint-config/package.json ./packages/eslint-config/
 COPY packages/typescript-config/package.json ./packages/typescript-config/
+COPY packages/types/package.json ./packages/types/
 COPY packages/ui/package.json ./packages/ui/
 
 # Copy apps package files
@@ -46,6 +47,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/eslint-config/package.json ./packages/eslint-config/
 COPY packages/typescript-config/package.json ./packages/typescript-config/
+COPY packages/types/package.json ./packages/types/
 COPY packages/ui/package.json ./packages/ui/
 
 # Install production dependencies

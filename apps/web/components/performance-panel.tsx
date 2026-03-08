@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@work
 import { Button } from "@workspace/ui/components/button"
 import { Badge } from "@workspace/ui/components/badge"
 import { Progress } from "@workspace/ui/components/progress"
-import type { ExplainResponse, AnalyzeStep } from "@/lib/types"
+import type { ExplainResponse, AnalyzeStep } from "@workspace/types"
 import { ArrowRight, Play, Zap, Clock, Terminal } from "lucide-react"
 import {PerformanceApi} from "@/lib/api-handlers/performance-api";
 

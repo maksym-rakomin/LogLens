@@ -50,6 +50,9 @@ importers:
       '@prisma/client':
         specifier: ^7.4.2
         version: 7.4.2(prisma@7.4.2(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.7.3))(typescript@5.7.3)
+      '@workspace/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
@@ -156,6 +159,9 @@ importers:
       '@reduxjs/toolkit':
         specifier: ^2.11.2
         version: 2.11.2(react-redux@9.2.0(@types/react@19.2.14)(react@19.2.4)(redux@5.0.1))(react@19.2.4)
+      '@workspace/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@workspace/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -292,6 +298,15 @@ importers:
       typescript-eslint:
         specifier: ^8.15.0
         version: 8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.7.3)
+
+  packages/types:
+    devDependencies:
+      '@workspace/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
 
   packages/typescript-config: {}
 
