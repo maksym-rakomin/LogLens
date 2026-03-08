@@ -1,3 +1,4 @@
+// --- LOGS ---
 export type LogLevel = "INFO" | "WARN" | "ERROR" | "DEBUG";
 
 export interface LogEntry {
@@ -7,7 +8,7 @@ export interface LogEntry {
   service: string;
   message: string;
   ip: string;
-  request_id: string;
+  requestId: string;
 }
 
 export interface LogFilters {
@@ -40,20 +41,35 @@ export interface LogsResponse {
   meta: LogsMeta;
 }
 
+// --- EXPLAIN (PERFORMANCE) ---
+export interface ExplainPlan {
+  queryTimeMs: number;
+  explain: string[];
+}
+
 export interface ExplainResponse {
   targetPage: number;
-  total: number;
-  offset: {
-    queryTimeMs: number;
-    rowsReturned: number;
-    explain: string[];
-  };
-  cursor: {
-    queryTimeMs: number;
-    rowsReturned: number;
-    explain: string[];
-  };
+  offset: ExplainPlan;
+  cursor: ExplainPlan;
   speedup: string;
+}
+
+// --- STATS ---
+export interface LevelCounts {
+  INFO: number;
+  WARN: number;
+  ERROR: number;
+  DEBUG: number;
+}
+
+export interface TimelineData extends LevelCounts {
+  date: string;
+  total: number;
+}
+
+export interface HourlyData extends LevelCounts {
+  hour: string;
+  total: number;
 }
 
 export interface StatsResponse {
@@ -61,24 +77,11 @@ export interface StatsResponse {
   uniqueIPs: number;
   levelCounts: Record<string, number>;
   serviceCounts: Record<string, number>;
-  timeline: Array<{
-    date: string;
-    INFO: number;
-    WARN: number;
-    ERROR: number;
-    DEBUG: number;
-    total: number;
-  }>;
-  hourly: Array<{
-    hour: string;
-    INFO: number;
-    WARN: number;
-    ERROR: number;
-    DEBUG: number;
-    total: number;
-  }>;
+  timeline: TimelineData[];
+  hourly: HourlyData[];
 }
 
+// --- ANALYZE ---
 export interface AnalyzeStep {
   step: string;
   message: string;
@@ -92,6 +95,48 @@ export interface AnalyzeStep {
   totalLogs?: number;
 }
 
+export interface AnalyzeSyncResponse {
+  mode: string;
+  totalLogs: number;
+  uniqueIPs: number;
+  errorMatches: number;
+  levelCounts: Record<string, number>;
+  serviceCounts: Record<string, number>;
+  topIPs: Array<{ ip: string; count: number }>;
+  computeTimeMs: number;
+  blocked: boolean;
+}
+
+// --- SYSTEM TASKS (WORKER & CHILD PROCESS) ---
+export interface WorkerAnalysisResult {
+  status: string;
+  analyzedCount: number;
+  foundErrors: number;
+  foundWarns: number;
+  regexMatches: number;
+  topIp: string;
+  topIpCount: number;
+  uniqueServices: number;
+  timeTakenMs: number;
+  type: string;
+}
+
+export interface ChildExportResult {
+  status: string;
+  file: string;
+  size: string;
+  records: number;
+  timeTakenMs: number;
+  type: string;
+}
+
+export interface ExportFile {
+  name: string;
+  sizeMB: string;
+  createdAt: string;
+}
+
+// --- OFFLINE ---
 export interface OfflineSavedSearch {
   id: string;
   name: string;

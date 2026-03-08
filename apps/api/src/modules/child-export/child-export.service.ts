@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { fork } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
+import type { ChildExportResult } from '@workspace/types';
 
 /**
  * Service for running external processes via Child Process
@@ -42,7 +43,7 @@ export class ChildExportService {
       // 2. Listen for messages (objects) sent by process.send() from the script
       child.on(
         'message',
-        (result: { error?: string; [key: string]: unknown }) => {
+        (result: { error?: string } & Partial<ChildExportResult>) => {
           if (result.error) {
             reject(new Error(result.error));
           } else {
@@ -51,7 +52,7 @@ export class ChildExportService {
               ...result,
               timeTakenMs: timeTaken,
               type: 'Child Process (fork)',
-            });
+            } as ChildExportResult);
           }
         },
       );

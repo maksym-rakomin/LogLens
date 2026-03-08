@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Worker } from 'worker_threads';
 import * as path from 'path';
+import type { WorkerAnalysisResult } from '@workspace/types';
 
 @Injectable()
 export class WorkerAnalysisService {
@@ -19,7 +20,7 @@ export class WorkerAnalysisService {
       // 2. Listen for messages from Worker
       worker.on(
         'message',
-        (result: { error?: string; [key: string]: unknown }) => {
+        (result: { error?: string } & Partial<WorkerAnalysisResult>) => {
           if (result.error) {
             reject(new Error(result.error));
           } else {
@@ -28,7 +29,7 @@ export class WorkerAnalysisService {
               ...result,
               timeTakenMs: timeTaken,
               type: 'Worker Thread',
-            });
+            } as WorkerAnalysisResult);
           }
         },
       );

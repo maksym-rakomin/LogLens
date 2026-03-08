@@ -6,13 +6,7 @@ import { SystemApi } from "@/lib/api-handlers/system-api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card"
 import { Button } from "@workspace/ui/components/button"
 import { Cpu, Archive, Play, CheckCircle2, Loader2, Download, FileArchive, Clock } from "lucide-react"
-
-// Type definition for history file
-interface ExportFile {
-  name: string;
-  sizeMB: string;
-  createdAt: string;
-}
+import type { WorkerAnalysisResult, ChildExportResult, ExportFile } from "@workspace/types"
 
 /**
  * System Tasks Panel
@@ -31,11 +25,11 @@ interface ExportFile {
 export function SystemTasksPanel() {
   // State for Worker Thread (log analysis)
   const [workerLoading, setWorkerLoading] = useState(false)
-  const [workerResult, setWorkerResult] = useState<any>(null)
+  const [workerResult, setWorkerResult] = useState<WorkerAnalysisResult | null>(null)
 
   // State for Child Process (export/archiving)
   const [childLoading, setChildLoading] = useState(false)
-  const [childResult, setChildResult] = useState<any>(null)
+  const [childResult, setChildResult] = useState<ChildExportResult | null>(null)
 
   // State for file history
   const [historyFiles, setHistoryFiles] = useState<ExportFile[]>([])

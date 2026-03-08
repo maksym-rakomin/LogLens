@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Observable, Subscriber } from 'rxjs';
+import type { AnalyzeStep } from '@workspace/types';
 
 /**
  * Service for log analysis
@@ -97,7 +98,7 @@ export class AnalyzeService {
     return new Observable((subscriber: Subscriber<MessageEvent>) => {
       const totalStart = performance.now();
       // Helper function to send analysis steps to client
-      const sendStep = (step: string, data: any) =>
+      const sendStep = (step: string, data: Partial<AnalyzeStep>) =>
         subscriber.next({ data: { step, ...data } } as MessageEvent);
 
       (async () => {

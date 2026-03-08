@@ -12,6 +12,7 @@ import { Progress } from "@workspace/ui/components/progress"
 import type { ExplainResponse, AnalyzeStep } from "@workspace/types"
 import { ArrowRight, Play, Zap, Clock, Terminal } from "lucide-react"
 import {PerformanceApi} from "@/lib/api-handlers/performance-api";
+import type { AnalyzeSyncResponse } from "@workspace/types";
 
 export function PerformancePanel() {
   // Target page for performance testing
@@ -149,10 +150,7 @@ function ExplainComparison({
 // Sync vs Stream analysis comparison component
 function AnalyzeComparison() {
   // State for sync result
-  const [syncResult, setSyncResult] = useState<{
-    computeTimeMs: number
-    blocked: boolean
-  } | null>(null)
+  const [syncResult, setSyncResult] = useState<AnalyzeSyncResponse | null>(null)
   const [syncLoading, setSyncLoading] = useState(false)
 
   // State for stream analysis

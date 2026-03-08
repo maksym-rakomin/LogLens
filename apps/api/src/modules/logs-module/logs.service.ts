@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GetLogsDto } from '../../common/dto/get-logs.dto';
-import { Log, Prisma } from '../../../generated/prisma/client';
+import { Log, Prisma, LogLevel } from '../../../generated/prisma/client';
+import type { LogsMeta } from '@workspace/types';
 
 /**
  * Service for working with logs
@@ -28,7 +29,7 @@ export class LogsService {
     // Build filter conditions for database
     const where: Prisma.LogWhereInput = {};
     // Filter by log level (INFO, WARN, ERROR, DEBUG)
-    if (level !== 'ALL') where.level = level as any;
+    if (level !== 'ALL') where.level = level as LogLevel;
     // Filter by service name
     if (service !== 'ALL') where.service = service;
     // Search by message text (case-insensitive)
@@ -41,7 +42,7 @@ export class LogsService {
     }
 
     let data: Log[] = [];
-    let meta: any = {};
+    let meta: LogsMeta;
 
     // Classic page-based pagination mode
     if (mode === 'offset') {
@@ -139,7 +140,7 @@ export class LogsService {
     ]);
 
     // Function to extract execution time from query plan
-    const extractTime = (explain: any[]) => {
+    const extractTime = (explain: { 'QUERY PLAN': string }[]) => {
       const execTimeLine = explain.find((row) =>
         row['QUERY PLAN'].includes('Execution Time'),
       );
